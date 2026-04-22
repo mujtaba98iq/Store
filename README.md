@@ -23,3 +23,4 @@ This project is a comprehensive cosmetics store management application designed 
 
 *   `StoreBackend/`: Contains the core backend service, including the API, database models, and business logic.
 *   `Store-deployment/`: Contains the Docker orchestration files (e.g., `docker-compose.yml`) used to deploy the application and its dependencies (like the database).
+*   `Store-frontend/`: Contains the Angular-based frontend web application.
