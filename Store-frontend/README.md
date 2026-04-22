@@ -54,6 +54,28 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## Docker
+
+### Build the image
+
+```bash
+docker build -t store-frontend .
+```
+
+### Run the container
+
+```bash
+docker run -p 8080:80 store-frontend
+```
+
+Then open your browser and navigate to `http://localhost:8080/`.
+
+### Build and run with a custom port
+
+```bash
+docker run -p 3000:80 store-frontend
+```
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
