@@ -1,0 +1,5 @@
+-- Add migration 
+dotnet ef migrations add AddUserTable --project Data --startup-project RestApi
+
+-- Update database
+dotnet ef database update --project Data --startup-project RestApi

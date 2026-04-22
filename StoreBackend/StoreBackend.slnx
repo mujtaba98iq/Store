@@ -1,0 +1,10 @@
+<Solution>
+  <Project Path="Data.Test/Data.Test.csproj" />
+  <Project Path="Data/Data.csproj" />
+  <Project Path="Domain.Test/Domain.Test.csproj" />
+  <Project Path="Domain/Domain.csproj" />
+  <Project Path="RestApi.Test/RestApi.Test.csproj" />
+  <Project Path="RestApi/RestApi.csproj" />
+  <Project Path="Sheard.Test/Sheard.Test.csproj" />
+  <Project Path="Sheard/Sheard.csproj" />
+</Solution>
