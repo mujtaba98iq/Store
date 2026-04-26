@@ -28,5 +28,16 @@ services:
       - db
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ../Store-frontend
+      dockerfile: Dockerfile
+    container_name: store_frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   postgres_data:
