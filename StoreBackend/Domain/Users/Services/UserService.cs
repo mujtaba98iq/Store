@@ -21,7 +21,10 @@ public class UserService(IUsersRepository usersRepository) : IUserService
             Password = password,
             Role = createUserParams.Role,
             CreatedAt = DateTime.UtcNow,
-            CreatedById = createUserParams.CreatedById
+            CreatedById = createUserParams.CreatedById,
+            RefreshTokenHash = string.Empty,
+            RefreshTokenExpiresAt = null,
+            RefreshTokenRevokeAt = null
         };
 
         user.CreatedById = createUserParams.CreatedById ?? "1";
