@@ -1,0 +1,30 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# Test projects
+**/*.Test/
+**/*.Tests/
+
+# IDE and OS files
+.vs/
+.vscode/
+*.user
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Logs
+*.log
+
+# Secrets and local config
+**/appsettings.Development.json
+**/launchSettings.json
+
+# Docs
+*.md
+*.txt
