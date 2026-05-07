@@ -1,4 +1,4 @@
-﻿using Domain.Products;
+using Domain.Products;
 using Microsoft.EntityFrameworkCore;
 using Sheard.Type;
 
@@ -16,7 +16,9 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
 
     public async Task<List<Product>> FindByFilters(ProductFilters productFilters)
     {
-        var query = dbContext.Products.AsNoTracking()
+        var query = dbContext.Products
+            .Include(p => p.Categories)
+            .AsNoTracking()
             .Where(g => g.DeletedAt == null)
             .AsQueryable();
 
@@ -88,7 +90,9 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
 
     public async Task<Product?> FindById(Guid id)
     {
-        var product = await dbContext.Products.FindAsync(id);
+        var product = await dbContext.Products
+            .Include(p => p.Categories)
+            .FirstOrDefaultAsync(p => p.Id == id);
         return product;
     }
 

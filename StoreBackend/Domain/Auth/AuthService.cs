@@ -1,5 +1,6 @@
 using Domain.Users;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace Domain.Auth;
 
-public class AuthService(IUsersRepository usersRepository, IConfiguration configuration) : IAuthService
+public class AuthService(IUsersRepository usersRepository, IConfiguration configuration, ILogger<AuthService> logger) : IAuthService
 {
     public async Task<AuthResult> Login(LoginParams loginParams)
     {
@@ -18,7 +19,10 @@ public class AuthService(IUsersRepository usersRepository, IConfiguration config
         bool passwordValid = BCrypt.Net.BCrypt.Verify(loginParams.Password, user.Password);
 
         if (!passwordValid)
+        {
+            logger.LogWarning("Invalid username or password for user {Username}", loginParams.Username);
             throw new UnauthorizedAccessException("Invalid username or password.");
+        }
 
 
         var claims = new[]
@@ -78,15 +82,24 @@ public class AuthService(IUsersRepository usersRepository, IConfiguration config
 
 
         if(user.RefreshTokenRevokeAt != null)
+        {
+            logger.LogWarning("Refresh token has been revoked for user {Email}", refreshTokkenParams.Email);
             throw new UnauthorizedAccessException("Refresh token has been revoked.");
+        }
 
         if(user.RefreshTokenExpiresAt == null || user.RefreshTokenExpiresAt <= DateTime.UtcNow)
+        {
+            logger.LogWarning("Refresh token has expired for user {Email}", refreshTokkenParams.Email);
             throw new UnauthorizedAccessException("Refresh token has expired.");
+        }
 
         bool refreshValid = BCrypt.Net.BCrypt.Verify(refreshTokkenParams.RefreshToken, user.RefreshTokenHash);
 
         if(!refreshValid)
+        {
+            logger.LogWarning("Invalid refresh token for user {Email}", refreshTokkenParams.Email);
            throw new UnauthorizedAccessException("Invalid refresh token.");
+        }
 
         var claims = new[]
             {

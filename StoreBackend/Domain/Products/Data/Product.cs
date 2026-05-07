@@ -1,4 +1,5 @@
-﻿using Domain.Data;
+using Domain.Categories;
+using Domain.Data;
 
 namespace Domain.Products;
 
@@ -17,4 +18,6 @@ public class Product : IAuditableEntity
     public string CreatedById  { get; set; }
     public string? UpdatedById { get; set; }
     public string? DeletedById { get; set; }
+
+    public ICollection<Category> Categories { get; set; } = new List<Category>();
 }

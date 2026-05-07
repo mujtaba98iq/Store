@@ -1,6 +1,7 @@
 using Domain.Auth;
 using Microsoft.AspNetCore.Mvc;
 using UseValidator;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace RestApi.Auth.Controllers;
 
@@ -17,6 +18,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 404)]
     [UseBodyValidator(Validator = typeof(LoginRequestValidator))]
+    [EnableRateLimiting("AuthLimiter")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         try
@@ -48,6 +50,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 404)]
     [UseBodyValidator(Validator = typeof(RefreshRequestValidator))]
+    [EnableRateLimiting("AuthLimiter")]
     public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
     {
         try

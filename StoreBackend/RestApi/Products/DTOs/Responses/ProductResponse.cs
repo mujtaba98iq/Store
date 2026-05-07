@@ -1,4 +1,6 @@
-﻿namespace RestApi.Products;
+using RestApi.Categories;
+
+namespace RestApi.Products;
 
 public class ProductResponse
 {
@@ -12,4 +14,6 @@ public class ProductResponse
     public DateTime? UpdatedAt { get; set; }
     public required string CreatedById { get; set; }
     public string? UpdatedById { get; set; }
+
+    public List<CategoryResponse> Categories { get; set; } = new();
 }

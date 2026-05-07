@@ -1,4 +1,4 @@
-﻿namespace Domain.Products;
+namespace Domain.Products;
 
 public class UpdateProductParams
 {
@@ -9,4 +9,5 @@ public class UpdateProductParams
     public int? Quantity { get; set; }
     public string? ImagePath { get; set; }
     public string UpdatedById { get; set; }
+    public List<Guid>? CategoryIds { get; set; }
 }

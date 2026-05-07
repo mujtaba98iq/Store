@@ -1,8 +1,9 @@
-﻿using Sheard.Type;
+using Domain.Categories;
+using Sheard.Type;
 
 namespace Domain.Products
 {
-    public class ProductService(IProductsRepository productsRepository) : IProductService
+    public class ProductService(IProductsRepository productsRepository, ICategoriesRepository categoriesRepository) : IProductService
     {
         public async Task<Product> Create(CreateProductParams CreateProductParams)
         {
@@ -17,6 +18,11 @@ namespace Domain.Products
                 CreatedAt = DateTime.UtcNow,
                 CreatedById = CreateProductParams.CreatedById
             };
+
+            if (CreateProductParams.CategoryIds != null && CreateProductParams.CategoryIds.Any())
+            {
+                product.Categories = await categoriesRepository.FindByIds(CreateProductParams.CategoryIds);
+            }
 
             product.CreatedById = "1";
             return await productsRepository.Create(product);
@@ -50,6 +56,11 @@ namespace Domain.Products
             product.ImagePath = udpateProductParams.ImagePath ?? product.ImagePath;
             product.UpdatedAt = DateTime.UtcNow;
             product.UpdatedById = "1";
+
+            if (udpateProductParams.CategoryIds != null)
+            {
+                product.Categories = await categoriesRepository.FindByIds(udpateProductParams.CategoryIds);
+            }
 
             return await productsRepository.Update(product);
         } 

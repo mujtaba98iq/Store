@@ -1,4 +1,4 @@
-﻿using Domain.Products;
+using Domain.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestApi.Extensions;
@@ -15,8 +15,8 @@ namespace RestApi.Products.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(ProductFilters productFilters)
         {
-            var products = productService.Search(productFilters);
-            return Ok(await products);
+            var products = await productService.Search(productFilters);
+            return Ok(responseFormatter.Many(products.Data, products.TotalCount));
         }
 
         [HttpPost]
@@ -31,6 +31,7 @@ namespace RestApi.Products.Controllers
                 Price = createProductRequest.Price,
                 Quantity = createProductRequest.Quantity,
                 ImagePath = createProductRequest.ImagePath,
+                CategoryIds = createProductRequest.CategoryIds,
                 CreatedById = this.GetUserId()
             };
 
@@ -66,6 +67,7 @@ namespace RestApi.Products.Controllers
                 Price = request.Price,
                 Quantity = request.Quantity,
                 ImagePath = request.ImagePath,
+                CategoryIds = request.CategoryIds,
                 UpdatedById = this.GetUserId()
             });
 

@@ -1,4 +1,4 @@
-﻿namespace RestApi.Products;
+namespace RestApi.Products;
 
 public class CreateProductRequest
 {
@@ -7,4 +7,5 @@ public class CreateProductRequest
     public decimal? Price { get; set; }
     public int? Quantity { get; set; }
     public required string ImagePath { get; set; }
+    public List<Guid>? CategoryIds { get; set; }
 }

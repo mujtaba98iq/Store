@@ -1,4 +1,4 @@
-﻿namespace Domain.Products;
+namespace Domain.Products;
 
 public class CreateProductParams
 {
@@ -8,4 +8,5 @@ public class CreateProductParams
     public decimal? Price { get; set; }
     public int? Quantity { get; set; }
     public required string ImagePath { get; set; }
+    public List<Guid>? CategoryIds { get; set; }
 }

@@ -1,7 +1,9 @@
 using Data.Auth;
+using Data.Categories;
 using Data.Products;
 using Data.Users;
 using Domain.Auth;
+using Domain.Categories;
 using Domain.Products;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +22,7 @@ public static class DataSetup
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+        services.AddScoped<ICategoriesRepository, CategoriesRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IUsersRepository,  UsersRepository>();
         services.AddScoped<IAuthRepository,   AuthRepository>();
