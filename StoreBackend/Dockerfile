@@ -24,5 +24,8 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Install Kerberos library for GSSAPI
+RUN apt-get update && apt-get install -y libkrb5-3 && rm -rf /var/lib/apt/lists/*
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "RestApi.dll"]
