@@ -1,5 +1,6 @@
 using Domain.Categories;
 using Domain.Data;
+using Domain.ProductImages;
 using Domain.ProductVariants;
 
 namespace Domain.Products;
@@ -22,4 +23,5 @@ public class Product : IAuditableEntity
 
     public ICollection<Category> Categories { get; set; } = new List<Category>();
     public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
+    public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
 }

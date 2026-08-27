@@ -1,4 +1,5 @@
 using RestApi.Categories;
+using RestApi.ProductImages;
 using RestApi.ProductVariants;
 
 namespace RestApi.Products;
@@ -18,4 +19,5 @@ public class ProductResponse
 
     public List<CategoryResponse> Categories { get; set; } = new();
     public List<ProductVariantResponse> Variants { get; set; } = new();
+    public List<ProductImageResponse> Images { get; set; } = new();
 }

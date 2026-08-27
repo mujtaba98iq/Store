@@ -1,11 +1,12 @@
 
 using Domain.Products;
 using RestApi.Categories;
+using RestApi.ProductImages;
 using RestApi.ProductVariants;
 
 namespace RestApi.Products;
 
-public class ProductResponseFormatter(ICategoryResponseFormatter categoryFormatter, IProductVariantResponseFormatter variantFormatter) : IProductResponseFormatter
+public class ProductResponseFormatter(ICategoryResponseFormatter categoryFormatter, IProductVariantResponseFormatter variantFormatter, IProductImageResponseFormatter imageFormatter) : IProductResponseFormatter
 {
     public ProductListResponse Many(IEnumerable<Product> product, int totalCount)
     {
@@ -37,7 +38,10 @@ public class ProductResponseFormatter(ICategoryResponseFormatter categoryFormatt
                 : new List<CategoryResponse>(),
             Variants = product.Variants != null
                 ? product.Variants.Select(variantFormatter.One).ToList()
-                : new List<ProductVariantResponse>()
+                : new List<ProductVariantResponse>(),
+            Images = product.Images != null
+                ? product.Images.Select(imageFormatter.One).ToList()
+                : new List<ProductImageResponse>()
         };
     }
 }

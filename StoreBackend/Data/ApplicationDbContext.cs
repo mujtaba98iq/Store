@@ -1,5 +1,6 @@
 using Domain.Auth;  // AuthResult etc. live here
 using Domain.Products;
+using Domain.ProductImages;
 using Domain.ProductVariants;
 using Domain.Categories;
 using Domain.Users;
@@ -10,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductVariant> ProductVariants { get; set; }
+    public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<User> Users { get; set; }
 
@@ -47,6 +49,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(v => v.Product)
             .WithMany(p => p.Variants)
             .HasForeignKey(v => v.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProductImage>()
+            .HasKey(i => i.Id);
+
+        modelBuilder.Entity<ProductImage>()
+            .Property(i => i.ImageUrl)
+            .IsRequired();
+
+        modelBuilder.Entity<ProductImage>()
+            .HasIndex(i => new { i.ProductId, i.DisplayOrder });
+
+        modelBuilder.Entity<ProductImage>()
+            .HasOne(i => i.Product)
+            .WithMany(p => p.Images)
+            .HasForeignKey(i => i.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Category>()

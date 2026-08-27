@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddData();
 builder.AddProductsModule();
 builder.AddProductVariantsModule();
+builder.AddProductImagesModule();
 builder.AddCategoriesModule();
 builder.AddUsersModule();
 builder.AddAuth();

@@ -19,6 +19,7 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
         var query = dbContext.Products
             .Include(p => p.Categories)
             .Include(p => p.Variants.Where(v => v.DeletedAt == null))
+            .Include(p => p.Images.Where(i => i.DeletedAt == null))
             .AsNoTracking()
             .Where(g => g.DeletedAt == null)
             .AsQueryable();
@@ -94,6 +95,7 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
         var product = await dbContext.Products
             .Include(p => p.Categories)
             .Include(p => p.Variants.Where(v => v.DeletedAt == null))
+            .Include(p => p.Images.Where(i => i.DeletedAt == null))
             .FirstOrDefaultAsync(p => p.Id == id);
         return product;
     }
