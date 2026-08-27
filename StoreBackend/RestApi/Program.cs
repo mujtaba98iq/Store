@@ -2,6 +2,7 @@ using RestApi.Setup;
 using RestApi.Users.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Scalar.AspNetCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
 
