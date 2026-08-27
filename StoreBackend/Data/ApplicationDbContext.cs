@@ -1,5 +1,6 @@
 using Domain.Auth;  // AuthResult etc. live here
 using Domain.Products;
+using Domain.ProductVariants;
 using Domain.Categories;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Product> Products { get; set; }
+    public DbSet<ProductVariant> ProductVariants { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<User> Users { get; set; }
 
@@ -29,6 +31,23 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Product>()
             .Property(p => p.ImagePath)
             .IsRequired();
+
+        modelBuilder.Entity<ProductVariant>()
+            .HasKey(v => v.Id);
+
+        modelBuilder.Entity<ProductVariant>()
+            .Property(v => v.Sku)
+            .IsRequired();
+
+        modelBuilder.Entity<ProductVariant>()
+            .HasIndex(v => v.Sku)
+            .IsUnique();
+
+        modelBuilder.Entity<ProductVariant>()
+            .HasOne(v => v.Product)
+            .WithMany(p => p.Variants)
+            .HasForeignKey(v => v.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Category>()
             .HasKey(c => c.Id);

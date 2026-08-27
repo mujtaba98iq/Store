@@ -1,5 +1,6 @@
 using Domain.Categories;
 using Domain.Data;
+using Domain.ProductVariants;
 
 namespace Domain.Products;
 
@@ -20,4 +21,5 @@ public class Product : IAuditableEntity
     public string? DeletedById { get; set; }
 
     public ICollection<Category> Categories { get; set; } = new List<Category>();
+    public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
 }

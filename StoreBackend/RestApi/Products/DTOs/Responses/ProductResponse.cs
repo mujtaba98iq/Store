@@ -1,4 +1,5 @@
 using RestApi.Categories;
+using RestApi.ProductVariants;
 
 namespace RestApi.Products;
 
@@ -16,4 +17,5 @@ public class ProductResponse
     public string? UpdatedById { get; set; }
 
     public List<CategoryResponse> Categories { get; set; } = new();
+    public List<ProductVariantResponse> Variants { get; set; } = new();
 }

@@ -1,10 +1,11 @@
 
 using Domain.Products;
 using RestApi.Categories;
+using RestApi.ProductVariants;
 
 namespace RestApi.Products;
 
-public class ProductResponseFormatter(ICategoryResponseFormatter categoryFormatter) : IProductResponseFormatter
+public class ProductResponseFormatter(ICategoryResponseFormatter categoryFormatter, IProductVariantResponseFormatter variantFormatter) : IProductResponseFormatter
 {
     public ProductListResponse Many(IEnumerable<Product> product, int totalCount)
     {
@@ -33,7 +34,10 @@ public class ProductResponseFormatter(ICategoryResponseFormatter categoryFormatt
             UpdatedById = product.UpdatedById,
             Categories = product.Categories != null 
                 ? product.Categories.Select(categoryFormatter.One).ToList() 
-                : new List<CategoryResponse>()
+                : new List<CategoryResponse>(),
+            Variants = product.Variants != null
+                ? product.Variants.Select(variantFormatter.One).ToList()
+                : new List<ProductVariantResponse>()
         };
     }
 }
