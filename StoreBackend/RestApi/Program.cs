@@ -59,7 +59,10 @@ var app = builder.Build();
 
 app.MapApiReference();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("StoreApiCorsPolicy");
 
