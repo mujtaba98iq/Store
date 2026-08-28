@@ -1,4 +1,5 @@
 using Domain.Data;
+using Domain.Inventories;
 using Domain.Products;
 
 namespace Domain.ProductVariants;
@@ -20,4 +21,5 @@ public class ProductVariant : IAuditableEntity
     public string? DeletedById { get; set; }
 
     public Product? Product { get; set; }
+    public Inventory? Inventory { get; set; }
 }

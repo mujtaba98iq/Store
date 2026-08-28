@@ -2,6 +2,7 @@ using Domain.Auth;  // AuthResult etc. live here
 using Domain.Products;
 using Domain.ProductImages;
 using Domain.ProductVariants;
+using Domain.Inventories;
 using Domain.Categories;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductVariant> ProductVariants { get; set; }
     public DbSet<ProductImage> ProductImages { get; set; }
+    public DbSet<Inventory> Inventories { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<User> Users { get; set; }
 
@@ -49,6 +51,24 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(v => v.Product)
             .WithMany(p => p.Variants)
             .HasForeignKey(v => v.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Inventory>()
+            .HasKey(i => i.Id);
+
+        // Derived from Quantity and ReservedQuantity, so it must never become a column.
+        modelBuilder.Entity<Inventory>()
+            .Ignore(i => i.AvailableQuantity);
+
+        // One stock row per variant, otherwise the same units could be counted twice.
+        modelBuilder.Entity<Inventory>()
+            .HasIndex(i => i.ProductVariantId)
+            .IsUnique();
+
+        modelBuilder.Entity<Inventory>()
+            .HasOne(i => i.ProductVariant)
+            .WithOne(v => v.Inventory)
+            .HasForeignKey<Inventory>(i => i.ProductVariantId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ProductImage>()

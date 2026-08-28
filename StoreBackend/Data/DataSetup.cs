@@ -1,11 +1,13 @@
 using Data.Auth;
 using Data.Categories;
+using Data.Inventories;
 using Data.ProductImages;
 using Data.ProductVariants;
 using Data.Products;
 using Data.Users;
 using Domain.Auth;
 using Domain.Categories;
+using Domain.Inventories;
 using Domain.ProductImages;
 using Domain.ProductVariants;
 using Domain.Products;
@@ -30,6 +32,7 @@ public static class DataSetup
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IProductVariantsRepository, ProductVariantsRepository>();
         services.AddScoped<IProductImagesRepository, ProductImagesRepository>();
+        services.AddScoped<IInventoriesRepository, InventoriesRepository>();
         services.AddScoped<IUsersRepository,  UsersRepository>();
         services.AddScoped<IAuthRepository,   AuthRepository>();
 

@@ -13,6 +13,7 @@ builder.AddCloudinary();
 builder.AddProductsModule();
 builder.AddProductVariantsModule();
 builder.AddProductImagesModule();
+builder.AddInventoriesModule();
 builder.AddCategoriesModule();
 builder.AddUsersModule();
 builder.AddAuth();
