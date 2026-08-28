@@ -2,7 +2,7 @@ using Domain.ProductImages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestApi.Extensions;
-using UseValidator;
+using RestApi.Validation;
 
 namespace RestApi.ProductImages.Controllers
 {
@@ -20,14 +20,18 @@ namespace RestApi.ProductImages.Controllers
         }
 
         [HttpPost]
+        [Consumes("multipart/form-data")]
+        [RequestSizeLimit(FormFileExtensions.MaxImageRequestSizeInBytes)]
         [ProducesResponseType(typeof(ProductImageResponse), 201)]
-        [UseBodyValidator(Validator = typeof(CreateProductImageRequestValidator))]
-        public async Task<IActionResult> Create([FromBody] CreateProductImageRequest createProductImageRequest)
+        [UseFormValidator(Validator = typeof(CreateProductImageRequestValidator))]
+        public async Task<IActionResult> Create([FromForm] CreateProductImageRequest createProductImageRequest)
         {
+            await using var imageContent = createProductImageRequest.Image.OpenReadStream();
+
             CreateProductImageParams createProductImageParams = new()
             {
                 ProductId = createProductImageRequest.ProductId,
-                ImageUrl = createProductImageRequest.ImageUrl,
+                ImageContent = imageContent,
                 IsPrimary = createProductImageRequest.IsPrimary,
                 DisplayOrder = createProductImageRequest.DisplayOrder,
                 CreatedById = this.GetUserId()
@@ -52,15 +56,19 @@ namespace RestApi.ProductImages.Controllers
 
 
         [HttpPatch("{productImageId}")]
+        [Consumes("multipart/form-data")]
+        [RequestSizeLimit(FormFileExtensions.MaxImageRequestSizeInBytes)]
         [ProducesResponseType(typeof(ProductImageResponse), 200)]
         [ProducesResponseType(typeof(object), 404)]
-        [UseBodyValidator(Validator = typeof(UpdateProductImageRequestValidator))]
-        public async Task<IActionResult> Update(Guid productImageId, [FromBody] UpdateProductImageRequest request)
+        [UseFormValidator(Validator = typeof(UpdateProductImageRequestValidator))]
+        public async Task<IActionResult> Update(Guid productImageId, [FromForm] UpdateProductImageRequest request)
         {
+            await using var imageContent = request.Image?.OpenReadStream();
+
             var updatedProductImage = await productImageService.Update(new UpdateProductImageParams
             {
                 Id = productImageId,
-                ImageUrl = request.ImageUrl,
+                ImageContent = imageContent,
                 IsPrimary = request.IsPrimary,
                 DisplayOrder = request.DisplayOrder,
                 UpdatedById = this.GetUserId()

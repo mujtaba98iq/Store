@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.AddData();
+builder.AddCloudinary();
 builder.AddProductsModule();
 builder.AddProductVariantsModule();
 builder.AddProductImagesModule();
