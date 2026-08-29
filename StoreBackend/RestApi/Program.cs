@@ -14,6 +14,7 @@ builder.AddProductsModule();
 builder.AddProductVariantsModule();
 builder.AddProductImagesModule();
 builder.AddInventoriesModule();
+builder.AddCartsModule();
 builder.AddCategoriesModule();
 builder.AddUsersModule();
 builder.AddAuth();

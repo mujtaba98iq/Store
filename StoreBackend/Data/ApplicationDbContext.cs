@@ -4,6 +4,7 @@ using Domain.ProductImages;
 using Domain.ProductVariants;
 using Domain.Inventories;
 using Domain.Categories;
+using Domain.Carts;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 namespace Data;
@@ -15,6 +16,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<Inventory> Inventories { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
     public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -98,6 +101,52 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasMany(p => p.Categories)
             .WithMany(c => c.Products)
             .UsingEntity(j => j.ToTable("ProductCategories"));
+
+        modelBuilder.Entity<Cart>()
+            .HasKey(c => c.Id);
+
+        // Summed from the lines it holds, so it must never become a column.
+        modelBuilder.Entity<Cart>()
+            .Ignore(c => c.TotalAmount);
+
+        // A customer shops out of a single cart, two of them would split the same basket.
+        // Filtered so the constraint ignores carts that were already closed.
+        modelBuilder.Entity<Cart>()
+            .HasIndex(c => c.UserId)
+            .IsUnique()
+            .HasFilter("\"DeletedAt\" IS NULL");
+
+        modelBuilder.Entity<Cart>()
+            .HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CartItem>()
+            .HasKey(i => i.Id);
+
+        // Quantity * UnitPrice, so it must never become a column.
+        modelBuilder.Entity<CartItem>()
+            .Ignore(i => i.Subtotal);
+
+        // A variant is topped up on the line it already has rather than listed twice.
+        // Filtered so it can be added again after its line was taken out.
+        modelBuilder.Entity<CartItem>()
+            .HasIndex(i => new { i.CartId, i.ProductVariantId })
+            .IsUnique()
+            .HasFilter("\"DeletedAt\" IS NULL");
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(i => i.Cart)
+            .WithMany(c => c.Items)
+            .HasForeignKey(i => i.CartId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(i => i.ProductVariant)
+            .WithMany()
+            .HasForeignKey(i => i.ProductVariantId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<User>()
             .HasKey(u => u.Id);

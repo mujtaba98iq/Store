@@ -1,4 +1,5 @@
 using Data.Auth;
+using Data.Carts;
 using Data.Categories;
 using Data.Inventories;
 using Data.ProductImages;
@@ -6,6 +7,7 @@ using Data.ProductVariants;
 using Data.Products;
 using Data.Users;
 using Domain.Auth;
+using Domain.Carts;
 using Domain.Categories;
 using Domain.Inventories;
 using Domain.ProductImages;
@@ -28,6 +30,8 @@ public static class DataSetup
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+        services.AddScoped<ICartsRepository, CartsRepository>();
+        services.AddScoped<ICartItemsRepository, CartItemsRepository>();
         services.AddScoped<ICategoriesRepository, CategoriesRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IProductVariantsRepository, ProductVariantsRepository>();

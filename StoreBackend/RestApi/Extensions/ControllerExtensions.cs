@@ -10,6 +10,15 @@ public static class ControllerExtensions
         return controller.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 
+    /// <summary>
+    /// The token generator always writes the user id into the identifier claim, so it can
+    /// be read back as the key of the rows the caller owns.
+    /// </summary>
+    public static Guid GetUserGuid(this ControllerBase controller)
+    {
+        return Guid.Parse(GetUserId(controller));
+    }
+
     public static string GetUserId(this ControllerBase controller)
     {
         return GetNullableUserId(controller)!;
