@@ -19,5 +19,9 @@ public class CheckoutRequestValidator : BaseValidator<CheckoutRequest>
             .NotNull()
             .WithMessage("ShippingAddress is required.")
             .SetValidator(new ShippingAddressRequestValidator());
+
+        RuleFor(x => x.PaymentMethod)
+            .IsInEnum()
+            .WithMessage("PaymentMethod must be one of CashOnDelivery, Card, ZainCash, FastPay or BankTransfer.");
     }
 }

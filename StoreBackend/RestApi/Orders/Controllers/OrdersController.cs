@@ -62,6 +62,7 @@ namespace RestApi.Orders.Controllers
                     Street = request.ShippingAddress.Street,
                     Building = request.ShippingAddress.Building
                 },
+                PaymentMethod = request.PaymentMethod,
                 CreatedById = this.GetUserId()
             });
 

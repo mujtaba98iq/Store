@@ -153,8 +153,14 @@ public class OrdersRepository(ApplicationDbContext dbContext) : IOrdersRepositor
     {
         // The address comes back with the order rather than on request: it is part of what
         // was agreed, the same as the lines, and a reader of one wants the other.
+        //
+        // The payments and the parcel come too, because the first two questions anyone asks
+        // about an order are whether it has been paid for and where it has got to. Payments
+        // are ordered oldest first, so a decline reads ahead of the retry that followed it.
         return query
             .Include(o => o.Items.Where(i => i.DeletedAt == null).OrderBy(i => i.CreatedAt))
-            .Include(o => o.ShippingAddress);
+            .Include(o => o.ShippingAddress)
+            .Include(o => o.Payments.Where(p => p.DeletedAt == null).OrderBy(p => p.CreatedAt))
+            .Include(o => o.Shipment);
     }
 }

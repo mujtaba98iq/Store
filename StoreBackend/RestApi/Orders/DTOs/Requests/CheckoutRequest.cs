@@ -1,3 +1,5 @@
+using Domain.Payments;
+
 namespace RestApi.Orders;
 
 public class CheckoutRequest
@@ -13,4 +15,11 @@ public class CheckoutRequest
     /// fulfilled, and the address given here is the one the order keeps.
     /// </summary>
     public required ShippingAddressRequest ShippingAddress { get; set; }
+
+    /// <summary>
+    /// How the customer means to pay. Required: checkout opens a payment against the order,
+    /// and a payment has to say by what means. Nothing is taken here — the payment starts
+    /// out pending whichever method is chosen.
+    /// </summary>
+    public required PaymentMethod PaymentMethod { get; set; }
 }

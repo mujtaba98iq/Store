@@ -1,4 +1,6 @@
 using Domain.Data;
+using Domain.Payments;
+using Domain.Shipments;
 using Domain.Users;
 
 namespace Domain.Orders;
@@ -57,4 +59,17 @@ public class Order : IAuditableEntity
     /// its money are. Nullable only because a read may not have asked for it.
     /// </summary>
     public OrderShippingAddress? ShippingAddress { get; set; }
+
+    /// <summary>
+    /// Every attempt to settle this order. More than one is normal rather than a fault: a
+    /// decline and the retry that followed it are both part of how the order got paid.
+    /// Empty unless a read asked for them, which the order's own reads do not.
+    /// </summary>
+    public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    /// <summary>
+    /// The parcel, once there is one. Nullable because an order is placed well before it
+    /// ships, and because a read may not have asked for it.
+    /// </summary>
+    public Shipment? Shipment { get; set; }
 }

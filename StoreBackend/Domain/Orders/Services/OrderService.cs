@@ -1,8 +1,10 @@
 using Domain.Carts;
 using Domain.Exeptions;
 using Domain.Inventories;
+using Domain.Payments;
 using Domain.ProductVariants;
 using Domain.Products;
+using Domain.Shipments;
 using Sheard.Type;
 
 namespace Domain.Orders
@@ -13,7 +15,9 @@ namespace Domain.Orders
         ICartService cartService,
         IInventoryService inventoryService,
         IProductVariantsRepository productVariantsRepository,
-        IProductsRepository productsRepository) : IOrderService
+        IProductsRepository productsRepository,
+        IPaymentService paymentService,
+        IShipmentService shipmentService) : IOrderService
     {
         /// <summary>
         /// A cart line with everything the order needs already copied off the catalogue.
@@ -127,6 +131,27 @@ namespace Domain.Orders
                 await ReserveStock(line.CartItem.ProductVariantId, line.CartItem.Quantity, checkoutParams.CreatedById);
             }
 
+            // Both are opened once the goods are actually held. A payment recorded against
+            // stock that turned out not to be there would have to be unpicked, and a parcel
+            // would be queued for a warehouse with nothing to pick.
+            //
+            // The payment starts pending whatever the method: a card is settled when the
+            // provider answers, cash when the courier hands the parcel over. The shipment
+            // starts pending too, which is a warehouse queue rather than a claim that
+            // anything has moved.
+            await paymentService.Record(new RecordPaymentParams
+            {
+                OrderId = order.Id,
+                PaymentMethod = checkoutParams.PaymentMethod,
+                CreatedById = checkoutParams.CreatedById
+            });
+
+            await shipmentService.Create(new CreateShipmentParams
+            {
+                OrderId = order.Id,
+                CreatedById = checkoutParams.CreatedById
+            });
+
             // Emptied last: until the order and its lines are on disk, the cart is the only
             // record of what the customer asked for.
             await cartService.Clear(new ClearCartParams
@@ -224,7 +249,40 @@ namespace Domain.Orders
 
             await ordersRepository.Update(order);
 
+            await SyncPaymentAndShipment(order, status, updatedById);
+
             return await ordersRepository.FindById(order.Id) ?? order;
+        }
+
+        /// <summary>
+        /// Brings the money and the parcel into line with an order that has just moved. Both
+        /// follow rather than lead, and both run after the status is written: the order is
+        /// the record of what happened, and a follower that failed first would block it.
+        /// </summary>
+        private async Task SyncPaymentAndShipment(Order order, OrderStatus status, string updatedById)
+        {
+            switch (status)
+            {
+                case OrderStatus.Shipped:
+                    await shipmentService.SyncWithOrderStatus(order.Id, ShipmentStatus.Shipped, updatedById);
+                    break;
+
+                case OrderStatus.Delivered:
+                    await shipmentService.SyncWithOrderStatus(order.Id, ShipmentStatus.Delivered, updatedById);
+
+                    // Delivery is the moment cash actually changes hands, so this is where a
+                    // cash order is settled. A card left pending at the door never came
+                    // through, and is deliberately left alone for somebody to look at.
+                    await paymentService.SettleCashOnDelivery(order.Id, updatedById);
+                    break;
+
+                case OrderStatus.Cancelled:
+                    // Only what was never collected. Money already taken goes back through an
+                    // explicit refund, which is a decision for staff rather than a side
+                    // effect of cancelling.
+                    await paymentService.VoidOutstanding(order.Id, updatedById);
+                    break;
+            }
         }
 
         /// <summary>

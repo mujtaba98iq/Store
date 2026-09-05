@@ -6,6 +6,8 @@ using Domain.Inventories;
 using Domain.Categories;
 using Domain.Carts;
 using Domain.Orders;
+using Domain.Payments;
+using Domain.Shipments;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 namespace Data;
@@ -22,6 +24,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<OrderShippingAddress> OrderShippingAddresses { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Shipment> Shipments { get; set; }
     public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -244,6 +248,51 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasOne(a => a.Order)
             .WithOne(o => o.ShippingAddress)
             .HasForeignKey<OrderShippingAddress>(a => a.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Payment>()
+            .HasKey(p => p.Id);
+
+        // Not unique: an order can hold several payments, because a decline followed by a
+        // retry, or a settlement followed by a refund, are all part of how it was paid. The
+        // read this serves is always "the payments against this order".
+        modelBuilder.Entity<Payment>()
+            .HasIndex(p => p.OrderId);
+
+        // A provider's transaction reference belongs to one payment and no other, so a
+        // callback that arrives twice cannot be banked twice. Filtered because most rows
+        // legitimately have none: cash on delivery never reaches a provider, and neither
+        // does an attempt that failed before it got there.
+        modelBuilder.Entity<Payment>()
+            .HasIndex(p => p.TransactionId)
+            .IsUnique()
+            .HasFilter("\"TransactionId\" IS NOT NULL");
+
+        // Cascaded, as the order's own lines are: a payment settles one order and says
+        // nothing without it.
+        modelBuilder.Entity<Payment>()
+            .HasOne(p => p.Order)
+            .WithMany(o => o.Payments)
+            .HasForeignKey(p => p.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Shipment>()
+            .HasKey(s => s.Id);
+
+        // Customers and support both chase a parcel by the number the carrier gave them.
+        // Not unique: carriers number their own consignments and two of them may well
+        // arrive at the same string.
+        modelBuilder.Entity<Shipment>()
+            .HasIndex(s => s.TrackingNumber);
+
+        // One shipment per order, which the one-to-one enforces with a unique key on
+        // OrderId: two of them could not agree on where the order has got to. Cascaded for
+        // the same reason as the shipping address, the shipment being part of the order
+        // rather than a record in its own right.
+        modelBuilder.Entity<Shipment>()
+            .HasOne(s => s.Order)
+            .WithOne(o => o.Shipment)
+            .HasForeignKey<Shipment>(s => s.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<User>()

@@ -1,3 +1,5 @@
+using Domain.Payments;
+
 namespace Domain.Orders;
 
 public class CheckoutParams
@@ -16,6 +18,13 @@ public class CheckoutParams
     /// still reads correctly after the customer moves.
     /// </summary>
     public required CheckoutShippingAddress ShippingAddress { get; set; }
+
+    /// <summary>
+    /// How the customer intends to pay. Required, because an order is opened with a payment
+    /// against it and a payment has to say by what means it is being made. It is a statement
+    /// of intent rather than of fact: nothing has been settled at this point.
+    /// </summary>
+    public required PaymentMethod PaymentMethod { get; set; }
 
     public required string CreatedById { get; set; }
 }

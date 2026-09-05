@@ -1,8 +1,16 @@
 using Domain.Orders;
+using RestApi.Payments;
+using RestApi.Shipments;
 
 namespace RestApi.Orders;
 
-public class OrderResponseFormatter : IOrderResponseFormatter
+/// <summary>
+/// The payment and shipment formatters are borrowed rather than reimplemented, so an order
+/// renders its money and its parcel exactly as those endpoints do.
+/// </summary>
+public class OrderResponseFormatter(
+    IPaymentResponseFormatter paymentResponseFormatter,
+    IShipmentResponseFormatter shipmentResponseFormatter) : IOrderResponseFormatter
 {
     public OrderListResponse Many(IEnumerable<Order> orders, int totalCount)
     {
@@ -23,6 +31,12 @@ public class OrderResponseFormatter : IOrderResponseFormatter
             .Select(One)
             .ToList();
 
+        var payments = order.Payments
+            .Where(p => p.DeletedAt == null)
+            .OrderBy(p => p.CreatedAt)
+            .Select(paymentResponseFormatter.One)
+            .ToList();
+
         // The stored amounts are handed back untouched rather than re-summed from the lines.
         // They are what the customer was billed, and a mismatch between the two is something
         // to notice, not something to paper over here.
@@ -34,6 +48,8 @@ public class OrderResponseFormatter : IOrderResponseFormatter
             Status = order.Status.ToString(),
             Items = items,
             ShippingAddress = order.ShippingAddress == null ? null : One(order.ShippingAddress),
+            Payments = payments,
+            Shipment = order.Shipment == null ? null : shipmentResponseFormatter.One(order.Shipment),
             ItemCount = items.Count,
             Subtotal = order.Subtotal,
             DiscountAmount = order.DiscountAmount,

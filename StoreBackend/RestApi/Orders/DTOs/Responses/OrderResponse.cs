@@ -1,3 +1,6 @@
+using RestApi.Payments;
+using RestApi.Shipments;
+
 namespace RestApi.Orders;
 
 public class OrderResponse
@@ -19,6 +22,17 @@ public class OrderResponse
     /// placed before addresses were recorded.
     /// </summary>
     public OrderShippingAddressResponse? ShippingAddress { get; set; }
+
+    /// <summary>
+    /// Every attempt to settle this order, oldest first. More than one is normal: a decline
+    /// and the retry that followed it both show, which is what makes the history readable.
+    /// </summary>
+    public required List<PaymentResponse> Payments { get; set; }
+
+    /// <summary>
+    /// The parcel. Null on an order placed before shipments were tracked.
+    /// </summary>
+    public ShipmentResponse? Shipment { get; set; }
 
     /// <summary>
     /// Number of lines on the order, not the number of units across them.
