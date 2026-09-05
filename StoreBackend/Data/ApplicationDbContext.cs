@@ -21,6 +21,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CartItem> CartItems { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<OrderShippingAddress> OrderShippingAddresses { get; set; }
     public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -204,6 +205,46 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(i => i.ProductVariantId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<OrderShippingAddress>()
+            .HasKey(a => a.Id);
+
+        // A copy of the address as it read at checkout, not a lookup. Required because an
+        // order nobody can deliver, or later prove was delivered, is not worth keeping.
+        // Area is the one part left optional: not every address is given with a district.
+        modelBuilder.Entity<OrderShippingAddress>()
+            .Property(a => a.FullName)
+            .IsRequired();
+
+        modelBuilder.Entity<OrderShippingAddress>()
+            .Property(a => a.PhoneNumber)
+            .IsRequired();
+
+        modelBuilder.Entity<OrderShippingAddress>()
+            .Property(a => a.Country)
+            .IsRequired();
+
+        modelBuilder.Entity<OrderShippingAddress>()
+            .Property(a => a.City)
+            .IsRequired();
+
+        modelBuilder.Entity<OrderShippingAddress>()
+            .Property(a => a.Street)
+            .IsRequired();
+
+        modelBuilder.Entity<OrderShippingAddress>()
+            .Property(a => a.Building)
+            .IsRequired();
+
+        // One address per order, which the one-to-one enforces with a unique key on OrderId:
+        // an order holding two of them could not say where the parcel actually went.
+        // Cascaded, unlike the order's own link to the user, because the address is part of
+        // the order rather than a record in its own right.
+        modelBuilder.Entity<OrderShippingAddress>()
+            .HasOne(a => a.Order)
+            .WithOne(o => o.ShippingAddress)
+            .HasForeignKey<OrderShippingAddress>(a => a.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<User>()
             .HasKey(u => u.Id);

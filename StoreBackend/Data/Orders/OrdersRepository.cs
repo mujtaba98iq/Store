@@ -15,7 +15,7 @@ public class OrdersRepository(ApplicationDbContext dbContext) : IOrdersRepositor
 
     public async Task<List<Order>> FindByFilters(OrderFilters orderFilters)
     {
-        var query = WithItems(dbContext.Orders.AsNoTracking())
+        var query = WithDetails(dbContext.Orders.AsNoTracking())
             .Where(o => o.DeletedAt == null)
             .AsQueryable();
 
@@ -110,14 +110,14 @@ public class OrdersRepository(ApplicationDbContext dbContext) : IOrdersRepositor
 
     public async Task<Order?> FindById(Guid id)
     {
-        var order = await WithItems(dbContext.Orders.AsNoTracking())
+        var order = await WithDetails(dbContext.Orders.AsNoTracking())
             .FirstOrDefaultAsync(o => o.Id == id && o.DeletedAt == null);
         return order;
     }
 
     public async Task<Order?> FindByOrderNumber(string orderNumber)
     {
-        var order = await WithItems(dbContext.Orders.AsNoTracking())
+        var order = await WithDetails(dbContext.Orders.AsNoTracking())
             .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber && o.DeletedAt == null);
         return order;
     }
@@ -149,8 +149,12 @@ public class OrdersRepository(ApplicationDbContext dbContext) : IOrdersRepositor
         return await query.CountAsync();
     }
 
-    private static IQueryable<Order> WithItems(IQueryable<Order> query)
+    private static IQueryable<Order> WithDetails(IQueryable<Order> query)
     {
-        return query.Include(o => o.Items.Where(i => i.DeletedAt == null).OrderBy(i => i.CreatedAt));
+        // The address comes back with the order rather than on request: it is part of what
+        // was agreed, the same as the lines, and a reader of one wants the other.
+        return query
+            .Include(o => o.Items.Where(i => i.DeletedAt == null).OrderBy(i => i.CreatedAt))
+            .Include(o => o.ShippingAddress);
     }
 }

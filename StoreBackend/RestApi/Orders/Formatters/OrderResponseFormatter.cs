@@ -33,6 +33,7 @@ public class OrderResponseFormatter : IOrderResponseFormatter
             OrderNumber = order.OrderNumber,
             Status = order.Status.ToString(),
             Items = items,
+            ShippingAddress = order.ShippingAddress == null ? null : One(order.ShippingAddress),
             ItemCount = items.Count,
             Subtotal = order.Subtotal,
             DiscountAmount = order.DiscountAmount,
@@ -42,6 +43,22 @@ public class OrderResponseFormatter : IOrderResponseFormatter
             UpdatedAt = order.UpdatedAt,
             CreatedById = order.CreatedById,
             UpdatedById = order.UpdatedById
+        };
+    }
+
+    private static OrderShippingAddressResponse One(OrderShippingAddress shippingAddress)
+    {
+        return new OrderShippingAddressResponse
+        {
+            Id = shippingAddress.Id.ToString(),
+            OrderId = shippingAddress.OrderId.ToString(),
+            FullName = shippingAddress.FullName,
+            PhoneNumber = shippingAddress.PhoneNumber,
+            Country = shippingAddress.Country,
+            City = shippingAddress.City,
+            Area = shippingAddress.Area,
+            Street = shippingAddress.Street,
+            Building = shippingAddress.Building
         };
     }
 

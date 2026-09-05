@@ -82,9 +82,14 @@ namespace Domain.Orders
 
             var placedAt = DateTime.UtcNow;
 
+            var orderId = Guid.NewGuid();
+
+            // The address is written as part of the order itself rather than through a call
+            // of its own: a delivery that cannot say where it went is not worth keeping, so
+            // the two rows land together or neither does.
             var order = await ordersRepository.Create(new Order
             {
-                Id = Guid.NewGuid(),
+                Id = orderId,
                 UserId = checkoutParams.UserId,
                 OrderNumber = await GenerateOrderNumber(),
                 Status = OrderStatus.Pending,
@@ -93,7 +98,8 @@ namespace Domain.Orders
                 ShippingAmount = checkoutParams.ShippingAmount,
                 TotalAmount = subtotal - checkoutParams.DiscountAmount + checkoutParams.ShippingAmount,
                 CreatedAt = placedAt,
-                CreatedById = checkoutParams.CreatedById
+                CreatedById = checkoutParams.CreatedById,
+                ShippingAddress = BuildShippingAddress(orderId, checkoutParams, placedAt)
             });
 
             // The unit price comes off the cart line, not the variant: the customer pays what
@@ -130,6 +136,31 @@ namespace Domain.Orders
             });
 
             return await ordersRepository.FindById(order.Id) ?? order;
+        }
+
+        /// <summary>
+        /// Copies the address off the checkout instead of pointing the order at one. The
+        /// customer may move, correct a typo or send the next order somewhere else entirely,
+        /// and an order that already went out must keep saying where it went.
+        /// </summary>
+        private static OrderShippingAddress BuildShippingAddress(Guid orderId, CheckoutParams checkoutParams, DateTime placedAt)
+        {
+            var shippingAddress = checkoutParams.ShippingAddress;
+
+            return new OrderShippingAddress
+            {
+                Id = Guid.NewGuid(),
+                OrderId = orderId,
+                FullName = shippingAddress.FullName,
+                PhoneNumber = shippingAddress.PhoneNumber,
+                Country = shippingAddress.Country,
+                City = shippingAddress.City,
+                Area = shippingAddress.Area,
+                Street = shippingAddress.Street,
+                Building = shippingAddress.Building,
+                CreatedAt = placedAt,
+                CreatedById = checkoutParams.CreatedById
+            };
         }
 
         public async Task<Order?> FindById(Guid id)

@@ -15,6 +15,12 @@ public class OrderResponse
     public required List<OrderItemResponse> Items { get; set; }
 
     /// <summary>
+    /// The address this order was sent to, as it read at checkout. Null only on an order
+    /// placed before addresses were recorded.
+    /// </summary>
+    public OrderShippingAddressResponse? ShippingAddress { get; set; }
+
+    /// <summary>
     /// Number of lines on the order, not the number of units across them.
     /// </summary>
     public required int ItemCount { get; set; }

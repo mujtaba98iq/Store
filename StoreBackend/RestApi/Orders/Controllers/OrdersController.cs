@@ -52,6 +52,16 @@ namespace RestApi.Orders.Controllers
                 UserId = this.GetUserGuid(),
                 DiscountAmount = request.DiscountAmount,
                 ShippingAmount = request.ShippingAmount,
+                ShippingAddress = new CheckoutShippingAddress
+                {
+                    FullName = request.ShippingAddress.FullName,
+                    PhoneNumber = request.ShippingAddress.PhoneNumber,
+                    Country = request.ShippingAddress.Country,
+                    City = request.ShippingAddress.City,
+                    Area = request.ShippingAddress.Area,
+                    Street = request.ShippingAddress.Street,
+                    Building = request.ShippingAddress.Building
+                },
                 CreatedById = this.GetUserId()
             });
 

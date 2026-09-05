@@ -51,4 +51,10 @@ public class Order : IAuditableEntity
 
     public User? User { get; set; }
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+
+    /// <summary>
+    /// The address the order was sent to, frozen at checkout in the same way its lines and
+    /// its money are. Nullable only because a read may not have asked for it.
+    /// </summary>
+    public OrderShippingAddress? ShippingAddress { get; set; }
 }
