@@ -5,6 +5,7 @@ using Domain.ProductVariants;
 using Domain.Inventories;
 using Domain.Categories;
 using Domain.Carts;
+using Domain.Orders;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 namespace Data;
@@ -18,6 +19,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Category> Categories { get; set; }
     public DbSet<Cart> Carts { get; set; }
     public DbSet<CartItem> CartItems { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -147,6 +150,60 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(i => i.ProductVariantId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Order>()
+            .HasKey(o => o.Id);
+
+        modelBuilder.Entity<Order>()
+            .Property(o => o.OrderNumber)
+            .IsRequired();
+
+        // Customers quote this instead of the id, and support looks orders up by it, so it
+        // has to point at exactly one order.
+        modelBuilder.Entity<Order>()
+            .HasIndex(o => o.OrderNumber)
+            .IsUnique();
+
+        // The common read is a customer opening their own order history, newest first.
+        modelBuilder.Entity<Order>()
+            .HasIndex(o => new { o.UserId, o.CreatedAt });
+
+        // Restricted rather than cascaded, unlike a cart: an order is a financial record and
+        // must outlive the account it was placed from.
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.User)
+            .WithMany()
+            .HasForeignKey(o => o.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<OrderItem>()
+            .HasKey(i => i.Id);
+
+        // Copies of the catalogue as it read at checkout, not lookups. They are required
+        // because a line that cannot say what was bought is not worth keeping.
+        modelBuilder.Entity<OrderItem>()
+            .Property(i => i.ProductName)
+            .IsRequired();
+
+        modelBuilder.Entity<OrderItem>()
+            .Property(i => i.Sku)
+            .IsRequired();
+
+        modelBuilder.Entity<OrderItem>()
+            .HasIndex(i => i.OrderId);
+
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(i => i.Order)
+            .WithMany(o => o.Items)
+            .HasForeignKey(i => i.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Restricted so retiring a variant cannot erase what somebody already bought.
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(i => i.ProductVariant)
+            .WithMany()
+            .HasForeignKey(i => i.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<User>()
             .HasKey(u => u.Id);
