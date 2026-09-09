@@ -1,5 +1,6 @@
 using Domain.Auth;  // AuthResult etc. live here
 using Domain.Products;
+using Domain.Reviews;
 using Domain.ProductImages;
 using Domain.ProductVariants;
 using Domain.Inventories;
@@ -26,6 +27,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OrderShippingAddress> OrderShippingAddresses { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Shipment> Shipments { get; set; }
+    public DbSet<Review> Reviews { get; set; }
     public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -294,6 +296,48 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithOne(o => o.Shipment)
             .HasForeignKey<Shipment>(s => s.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Review>()
+            .HasKey(r => r.Id);
+
+        // One review per customer per product, so a score cannot be moved by one person
+        // posting five times. Buying the product again does not earn a second review: the
+        // customer revises the one they already hold. Filtered so a review that was taken
+        // down does not block a replacement.
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => new { r.UserId, r.ProductId })
+            .IsUnique()
+            .HasFilter("\"DeletedAt\" IS NULL");
+
+        // The read this serves is a product page: the reviews of one product that staff have
+        // cleared, newest first. The moderation queue reads the same index from the other
+        // side of IsApproved.
+        modelBuilder.Entity<Review>()
+            .HasIndex(r => new { r.ProductId, r.IsApproved, r.CreatedAt });
+
+        // Cascaded, as a product's images and variants are: a review of a product that is
+        // gone has nothing left to be about.
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Product)
+            .WithMany()
+            .HasForeignKey(r => r.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Cascaded too, as a cart is rather than as an order is: a review is the customer's
+        // own words about a purchase, not a financial record that has to outlive them.
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Restricted, unlike the other two: the order is what entitles the review, so it
+        // must not be possible to erase the purchase and leave the opinion standing.
+        modelBuilder.Entity<Review>()
+            .HasOne(r => r.Order)
+            .WithMany()
+            .HasForeignKey(r => r.OrderId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<User>()
             .HasKey(u => u.Id);

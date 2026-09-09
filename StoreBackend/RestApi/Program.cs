@@ -18,6 +18,7 @@ builder.AddCartsModule();
 builder.AddOrdersModule();
 builder.AddPaymentsModule();
 builder.AddShipmentsModule();
+builder.AddReviewsModule();
 builder.AddCategoriesModule();
 builder.AddUsersModule();
 builder.AddAuth();

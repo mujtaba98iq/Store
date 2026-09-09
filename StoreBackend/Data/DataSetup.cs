@@ -7,6 +7,7 @@ using Data.Payments;
 using Data.ProductImages;
 using Data.ProductVariants;
 using Data.Products;
+using Data.Reviews;
 using Data.Shipments;
 using Data.Users;
 using Domain.Auth;
@@ -18,6 +19,7 @@ using Domain.Payments;
 using Domain.ProductImages;
 using Domain.ProductVariants;
 using Domain.Products;
+using Domain.Reviews;
 using Domain.Shipments;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +49,7 @@ public static class DataSetup
         services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
         services.AddScoped<IPaymentsRepository, PaymentsRepository>();
         services.AddScoped<IShipmentsRepository, ShipmentsRepository>();
+        services.AddScoped<IReviewsRepository, ReviewsRepository>();
         services.AddScoped<IUsersRepository,  UsersRepository>();
         services.AddScoped<IAuthRepository,   AuthRepository>();
 
