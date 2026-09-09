@@ -10,6 +10,7 @@ using Domain.Orders;
 using Domain.Payments;
 using Domain.Shipments;
 using Domain.Users;
+using Domain.Wishlists;
 using Microsoft.EntityFrameworkCore;
 namespace Data;
 
@@ -28,6 +29,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Shipment> Shipments { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<WishlistItem> WishlistItems { get; set; }
     public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -338,6 +340,42 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(r => r.OrderId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<WishlistItem>()
+            .HasKey(w => w.Id);
+
+        // One entry per product per customer: a wishlist is a set of things wanted, and
+        // wanting the same product twice is not a different state from wanting it once.
+        // Filtered so a product taken off a list can be put back on it.
+        modelBuilder.Entity<WishlistItem>()
+            .HasIndex(w => new { w.UserId, w.ProductId })
+            .IsUnique()
+            .HasFilter("\"DeletedAt\" IS NULL");
+
+        // The read this serves is a customer opening their own wishlist, newest first.
+        modelBuilder.Entity<WishlistItem>()
+            .HasIndex(w => new { w.UserId, w.CreatedAt });
+
+        // Read from the other side, the entries against one product are the people waiting
+        // on it, which is what says whether restocking it is worth the trouble.
+        modelBuilder.Entity<WishlistItem>()
+            .HasIndex(w => w.ProductId);
+
+        // Cascaded, as a review of a product is: an entry pointing at a product that is gone
+        // has nothing left to be about.
+        modelBuilder.Entity<WishlistItem>()
+            .HasOne(w => w.Product)
+            .WithMany()
+            .HasForeignKey(w => w.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Cascaded too, as a cart is rather than as an order is: what a customer meant to buy
+        // one day is not a financial record that has to outlive their account.
+        modelBuilder.Entity<WishlistItem>()
+            .HasOne(w => w.User)
+            .WithMany()
+            .HasForeignKey(w => w.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<User>()
             .HasKey(u => u.Id);

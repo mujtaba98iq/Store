@@ -10,6 +10,7 @@ using Data.Products;
 using Data.Reviews;
 using Data.Shipments;
 using Data.Users;
+using Data.Wishlists;
 using Domain.Auth;
 using Domain.Carts;
 using Domain.Categories;
@@ -22,6 +23,7 @@ using Domain.Products;
 using Domain.Reviews;
 using Domain.Shipments;
 using Domain.Users;
+using Domain.Wishlists;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -50,6 +52,7 @@ public static class DataSetup
         services.AddScoped<IPaymentsRepository, PaymentsRepository>();
         services.AddScoped<IShipmentsRepository, ShipmentsRepository>();
         services.AddScoped<IReviewsRepository, ReviewsRepository>();
+        services.AddScoped<IWishlistItemsRepository, WishlistItemsRepository>();
         services.AddScoped<IUsersRepository,  UsersRepository>();
         services.AddScoped<IAuthRepository,   AuthRepository>();
 
