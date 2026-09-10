@@ -1,3 +1,4 @@
+using Domain.Coupons;
 using Domain.Data;
 using Domain.Payments;
 using Domain.Shipments;
@@ -31,10 +32,27 @@ public class Order : IAuditableEntity
     public decimal Subtotal { get; set; }
 
     /// <summary>
-    /// Money off the order as a whole, such as a coupon. Discounts that belong to a single
-    /// line sit on that line instead and are already inside <see cref="Subtotal"/>.
+    /// Money off the order as a whole, worked out from <see cref="CouponId"/> at checkout.
+    /// Discounts that belong to a single line sit on that line instead and are already
+    /// inside <see cref="Subtotal"/>.
+    ///
+    /// Frozen like the rest of the money: editing the coupon afterwards, or withdrawing it
+    /// altogether, does not change what this order was billed.
     /// </summary>
     public decimal DiscountAmount { get; set; }
+
+    /// <summary>
+    /// The campaign the discount came from, where one was quoted. Null on an order placed
+    /// without a coupon, which is most of them.
+    /// </summary>
+    public Guid? CouponId { get; set; }
+
+    /// <summary>
+    /// The code as it was redeemed, copied here for the same reason the product name and SKU
+    /// are copied onto a line: the order has to stay readable on its own. A coupon row can be
+    /// edited or deleted years later, and this is what still says what the customer typed.
+    /// </summary>
+    public string? CouponCode { get; set; }
 
     public decimal ShippingAmount { get; set; }
 
@@ -52,6 +70,14 @@ public class Order : IAuditableEntity
     public string? DeletedById { get; set; }
 
     public User? User { get; set; }
+
+    /// <summary>
+    /// The campaign behind <see cref="DiscountAmount"/>. Null where none was quoted, and
+    /// also null unless a read asked for it, which the order's own reads do not: everything
+    /// an order needs to say about its discount is already on the order.
+    /// </summary>
+    public Coupon? Coupon { get; set; }
+
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
 
     /// <summary>

@@ -1,6 +1,7 @@
 using Data.Auth;
 using Data.Carts;
 using Data.Categories;
+using Data.Coupons;
 using Data.Inventories;
 using Data.Orders;
 using Data.Payments;
@@ -14,6 +15,7 @@ using Data.Wishlists;
 using Domain.Auth;
 using Domain.Carts;
 using Domain.Categories;
+using Domain.Coupons;
 using Domain.Inventories;
 using Domain.Orders;
 using Domain.Payments;
@@ -51,6 +53,7 @@ public static class DataSetup
         services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
         services.AddScoped<IPaymentsRepository, PaymentsRepository>();
         services.AddScoped<IShipmentsRepository, ShipmentsRepository>();
+        services.AddScoped<ICouponsRepository, CouponsRepository>();
         services.AddScoped<IReviewsRepository, ReviewsRepository>();
         services.AddScoped<IWishlistItemsRepository, WishlistItemsRepository>();
         services.AddScoped<IUsersRepository,  UsersRepository>();

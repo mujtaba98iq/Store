@@ -7,10 +7,20 @@ public class CheckoutParams
     public required Guid UserId { get; set; }
 
     /// <summary>
-    /// Money taken off and added on top of the goods. Both are supplied by the caller for
-    /// now; when promotions and shipping rates exist they will be worked out here instead.
+    /// The coupon the customer is quoting, if any. A code rather than an amount: what comes
+    /// off is worked out here from the campaign's own terms, so a client cannot name its own
+    /// discount. Null or blank checks out at full price.
+    ///
+    /// Redeeming it is part of placing the order, which is why the code is taken here rather
+    /// than applied afterwards: the usage limit has to be spent in the same breath as the
+    /// order that spent it.
     /// </summary>
-    public decimal DiscountAmount { get; set; }
+    public string? CouponCode { get; set; }
+
+    /// <summary>
+    /// Carriage on top of the goods, still supplied by the caller: shipping rates are not
+    /// worked out anywhere yet.
+    /// </summary>
     public decimal ShippingAmount { get; set; }
 
     /// <summary>

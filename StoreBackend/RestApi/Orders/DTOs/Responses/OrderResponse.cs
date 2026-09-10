@@ -41,6 +41,13 @@ public class OrderResponse
 
     public required decimal Subtotal { get; set; }
     public required decimal DiscountAmount { get; set; }
+
+    /// <summary>
+    /// The coupon behind the discount, as it was quoted. Null on an order placed without
+    /// one. It is the order's own copy rather than a look at the campaign, so it still reads
+    /// correctly after the coupon is edited or withdrawn.
+    /// </summary>
+    public string? CouponCode { get; set; }
     public required decimal ShippingAmount { get; set; }
     public required decimal TotalAmount { get; set; }
 

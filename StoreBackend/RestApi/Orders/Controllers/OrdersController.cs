@@ -40,6 +40,10 @@ namespace RestApi.Orders.Controllers
 
         /// <summary>
         /// Places the contents of the caller's cart as an order and empties the cart.
+        ///
+        /// A coupon is quoted by code and redeemed here, which is also where its usage limit
+        /// is spent. A code that cannot be used stops the checkout: previewing it first is
+        /// what the basket page is for.
         /// </summary>
         [HttpPost("checkout")]
         [ProducesResponseType(typeof(OrderResponse), 201)]
@@ -50,7 +54,7 @@ namespace RestApi.Orders.Controllers
             var order = await orderService.Checkout(new CheckoutParams
             {
                 UserId = this.GetUserGuid(),
-                DiscountAmount = request.DiscountAmount,
+                CouponCode = request.CouponCode,
                 ShippingAmount = request.ShippingAmount,
                 ShippingAddress = new CheckoutShippingAddress
                 {

@@ -53,6 +53,7 @@ public class OrderResponseFormatter(
             ItemCount = items.Count,
             Subtotal = order.Subtotal,
             DiscountAmount = order.DiscountAmount,
+            CouponCode = order.CouponCode,
             ShippingAmount = order.ShippingAmount,
             TotalAmount = order.TotalAmount,
             CreatedAt = order.CreatedAt,

@@ -5,9 +5,19 @@ namespace RestApi.Orders;
 public class CheckoutRequest
 {
     /// <summary>
-    /// Money off the goods and carriage on top. Both default to nothing.
+    /// The coupon the customer is quoting. A code, not an amount: what comes off is worked
+    /// out on the server from the campaign's own terms, so a client cannot name its own
+    /// discount. Leave it out or send it empty to check out at full price.
+    ///
+    /// A code that cannot be used stops the checkout rather than being ignored. The customer
+    /// meant to buy at a discount, and billing them full price instead is not the shop's
+    /// decision — preview the code first if the basket page needs to know.
     /// </summary>
-    public decimal DiscountAmount { get; set; }
+    public string? CouponCode { get; set; }
+
+    /// <summary>
+    /// Carriage on top of the goods. Defaults to nothing.
+    /// </summary>
     public decimal ShippingAmount { get; set; }
 
     /// <summary>

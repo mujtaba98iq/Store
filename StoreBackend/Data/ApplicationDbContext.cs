@@ -6,6 +6,7 @@ using Domain.ProductVariants;
 using Domain.Inventories;
 using Domain.Categories;
 using Domain.Carts;
+using Domain.Coupons;
 using Domain.Orders;
 using Domain.Payments;
 using Domain.Shipments;
@@ -28,6 +29,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OrderShippingAddress> OrderShippingAddresses { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Shipment> Shipments { get; set; }
+    public DbSet<Coupon> Coupons { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<WishlistItem> WishlistItems { get; set; }
     public DbSet<User> Users { get; set; }
@@ -376,6 +378,37 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .WithMany()
             .HasForeignKey(w => w.UserId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Coupon>()
+            .HasKey(c => c.Id);
+
+        modelBuilder.Entity<Coupon>()
+            .Property(c => c.Code)
+            .IsRequired();
+
+        // The code is what a customer types, so it has to name exactly one coupon. It is
+        // stored upper-cased, which is what lets a plain equality index enforce that.
+        // Filtered so a code withdrawn along with a finished campaign can be issued again.
+        modelBuilder.Entity<Coupon>()
+            .HasIndex(c => c.Code)
+            .IsUnique()
+            .HasFilter("\"DeletedAt\" IS NULL");
+
+        // The read a staff dashboard makes: the campaigns still running, soonest to close
+        // first. IsActive leads because it is the cheapest of the three to discriminate on,
+        // being the switch staff throw rather than a date that passes on its own.
+        modelBuilder.Entity<Coupon>()
+            .HasIndex(c => new { c.IsActive, c.StartDate, c.EndDate });
+
+        // Restricted, unlike an order's own lines and address: the coupon is the reason the
+        // customer paid less, so erasing a campaign must not leave an order claiming a
+        // discount nothing accounts for. The order carries its own copy of the code as well,
+        // so it still reads correctly once the campaign is long over.
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Coupon)
+            .WithMany()
+            .HasForeignKey(o => o.CouponId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<User>()
             .HasKey(u => u.Id);

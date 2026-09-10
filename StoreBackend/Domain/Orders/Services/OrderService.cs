@@ -1,4 +1,5 @@
 using Domain.Carts;
+using Domain.Coupons;
 using Domain.Exeptions;
 using Domain.Inventories;
 using Domain.Payments;
@@ -17,7 +18,8 @@ namespace Domain.Orders
         IProductVariantsRepository productVariantsRepository,
         IProductsRepository productsRepository,
         IPaymentService paymentService,
-        IShipmentService shipmentService) : IOrderService
+        IShipmentService shipmentService,
+        ICouponService couponService) : IOrderService
     {
         /// <summary>
         /// A cart line with everything the order needs already copied off the catalogue.
@@ -27,8 +29,10 @@ namespace Domain.Orders
         private sealed record CheckoutLine(CartItem CartItem, string ProductName, string Sku)
         {
             /// <summary>
-            /// Nothing comes off an individual line yet: there is no promotions engine to
-            /// decide it. The column exists so one has somewhere to write.
+            /// Nothing comes off an individual line. Coupons discount the order as a whole
+            /// and sit on <see cref="Order.DiscountAmount"/>; nothing yet decides what a
+            /// single line is worth on its own. The column exists so that when something
+            /// does, it has somewhere to write.
             /// </summary>
             public decimal DiscountAmount => decimal.Zero;
 
@@ -82,7 +86,20 @@ namespace Domain.Orders
             }
 
             var subtotal = lines.Sum(line => line.TotalAmount);
-            EnsureAmountsAreConsistent(subtotal, checkoutParams.DiscountAmount, checkoutParams.ShippingAmount);
+
+            // Redeemed after every line has been priced and found in stock, so a checkout
+            // that was going to fail anyway does not spend one of a limited campaign's
+            // redemptions on its way out.
+            //
+            // It is still spent before the order is written, and that is the deliberate
+            // choice: the alternative is to book it afterwards, which would let two customers
+            // both pass the limit check and both get through. A redemption stranded by a
+            // failure further down is the same kind of loose end as stock left reserved by
+            // one, and is put right the same way, by hand.
+            var couponApplication = await RedeemCoupon(checkoutParams, subtotal);
+            var discountAmount = couponApplication?.DiscountAmount ?? decimal.Zero;
+
+            EnsureAmountsAreConsistent(subtotal, discountAmount, checkoutParams.ShippingAmount);
 
             var placedAt = DateTime.UtcNow;
 
@@ -98,9 +115,14 @@ namespace Domain.Orders
                 OrderNumber = await GenerateOrderNumber(),
                 Status = OrderStatus.Pending,
                 Subtotal = subtotal,
-                DiscountAmount = checkoutParams.DiscountAmount,
+                DiscountAmount = discountAmount,
+
+                // The code is copied as well as pointed at, so the order can still say what
+                // was quoted after the campaign is edited or withdrawn.
+                CouponId = couponApplication?.Coupon.Id,
+                CouponCode = couponApplication?.Coupon.Code,
                 ShippingAmount = checkoutParams.ShippingAmount,
-                TotalAmount = subtotal - checkoutParams.DiscountAmount + checkoutParams.ShippingAmount,
+                TotalAmount = subtotal - discountAmount + checkoutParams.ShippingAmount,
                 CreatedAt = placedAt,
                 CreatedById = checkoutParams.CreatedById,
                 ShippingAddress = BuildShippingAddress(orderId, checkoutParams, placedAt)
@@ -161,6 +183,30 @@ namespace Domain.Orders
             });
 
             return await ordersRepository.FindById(order.Id) ?? order;
+        }
+
+        /// <summary>
+        /// Spends the quoted coupon, or returns null where none was quoted.
+        ///
+        /// A blank code counts as none rather than as a code that does not exist: a client
+        /// sending an empty field is a customer who did not fill the box in, and refusing
+        /// their checkout over it would be nonsense. Anything else is looked up, and a code
+        /// that cannot be used stops the checkout — the customer chose to buy at a discount,
+        /// and quietly billing them full price instead is not the shop's decision to make.
+        /// </summary>
+        private async Task<CouponApplication?> RedeemCoupon(CheckoutParams checkoutParams, decimal subtotal)
+        {
+            if (string.IsNullOrWhiteSpace(checkoutParams.CouponCode))
+            {
+                return null;
+            }
+
+            return await couponService.Redeem(new RedeemCouponParams
+            {
+                Code = checkoutParams.CouponCode,
+                Subtotal = subtotal,
+                UpdatedById = checkoutParams.CreatedById
+            });
         }
 
         /// <summary>
@@ -423,6 +469,12 @@ namespace Domain.Orders
             }
         }
 
+        /// <summary>
+        /// A last look at the money before it is written down. The discount now comes from a
+        /// coupon, which already caps and clamps it, so these are no longer the first line of
+        /// defence — they are the check that the number reaching the order is sane whatever
+        /// produced it.
+        /// </summary>
         private static void EnsureAmountsAreConsistent(decimal subtotal, decimal discountAmount, decimal shippingAmount)
         {
             if (discountAmount < 0)
