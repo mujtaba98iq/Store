@@ -91,11 +91,11 @@
               [price]="product.price ?? 0"
               [image]="imageFor(product)"
               [category]="product.categories[0]?.name ?? ''"
+              [description]="product.description"
               [editable]="isAdmin()"
               (add)="addToBag(product)"
               (edit)="openEdit(product)"
             />
-            <p class="grid__note">{{ product.description }}</p>
           </li>
         }
       </ul>
