@@ -71,18 +71,36 @@
   </div>
 
   <div class="form__row">
-    <label class="form__label" for="product-image">Image path</label>
-    <input
-      id="product-image"
-      class="form__control"
-      type="text"
-      placeholder="/product-images/product-cream.svg"
-      formControlName="imagePath"
-    />
-    @if (showError('imagePath')) {
-      <p class="form__hint form__hint--error">An image path is required.</p>
+    <label class="form__label" for="product-image">Image</label>
+    <div class="upload">
+      @if (previewSrc()) {
+        <img class="upload__preview" [src]="previewSrc()" alt="" />
+      } @else {
+        <span class="upload__preview upload__preview--empty">No image yet</span>
+      }
+
+      <div class="upload__controls">
+        <!-- Off-screen rather than hidden, so it keeps its place in the tab order. -->
+        <input
+          id="product-image"
+          class="sr-only"
+          type="file"
+          [accept]="imageAccept"
+          (change)="onImageSelected($event)"
+        />
+        <label class="btn btn--light upload__button" for="product-image">
+          {{ imageFile() || previewSrc() ? 'Change image' : 'Choose image' }}
+        </label>
+        @if (imageFile()) {
+          <p class="upload__file">{{ imageFile()?.name }}</p>
+        }
+        <p class="form__hint">{{ imageHint }}</p>
+      </div>
+    </div>
+    @if (imageError()) {
+      <p class="form__hint form__hint--error">{{ imageError() }}</p>
     }
-    @for (message of messagesFor('imagePath'); track message) {
+    @for (message of imageMessages(); track message) {
       <p class="form__hint form__hint--error">{{ message }}</p>
     }
   </div>

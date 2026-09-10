@@ -88,3 +88,52 @@
   gap: 0.75rem;
   margin-top: 0.5rem;
 }
+
+.upload {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  margin-top: 0.35rem;
+}
+
+.upload__preview {
+  flex: 0 0 auto;
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: cover;
+  background: var(--STOR-cream);
+  border: 1px solid var(--STOR-line);
+  border-radius: 2px;
+}
+
+.upload__preview--empty {
+  display: grid;
+  place-items: center;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--STOR-ink-soft);
+}
+
+.upload__controls {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.upload__button {
+  justify-self: start;
+  min-height: 2.5rem;
+  padding: 0 1rem;
+}
+
+.upload__file {
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+/* The picker itself is off-screen, so its focus ring has to land on the label. */
+input[type='file']:focus-visible + .upload__button {
+  outline: 2px solid var(--STOR-ink);
+  outline-offset: 2px;
+}

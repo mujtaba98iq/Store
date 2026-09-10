@@ -33,6 +33,19 @@ function isFetchable(url: string | null | undefined): boolean {
   return /^https?:\/\//i.test((url ?? '').trim());
 }
 
+/** The order the storefront shows uploads in: primary first, then display order. */
+function byProminence(left: ProductImage, right: ProductImage): number {
+  return Number(right.isPrimary) - Number(left.isPrimary) || left.displayOrder - right.displayOrder;
+}
+
+/**
+ * The uploaded image a replacement file should overwrite, or null when the product
+ * has no upload yet and the file has to be posted as a new one instead.
+ */
+export function primaryImage(product: Product): ProductImage | null {
+  return [...product.images].sort(byProminence).at(0) ?? null;
+}
+
 /**
  * The image to render: the uploaded primary image, then the remaining uploads by
  * display order, then the legacy `imagePath` column. Candidates that are not
@@ -41,11 +54,41 @@ function isFetchable(url: string | null | undefined): boolean {
  * nothing is usable, and the card draws a placeholder instead.
  */
 export function productImageUrl(product: Product): string {
-  const uploaded = [...product.images]
-    .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.displayOrder - b.displayOrder)
-    .map((image) => image.imageUrl);
+  const uploaded = [...product.images].sort(byProminence).map((image) => image.imageUrl);
 
   return [...uploaded, product.imagePath].find(isFetchable)?.trim() ?? '';
+}
+
+/** Mirrors `RestApi.Extensions.FormFileExtensions`. */
+export const MAX_IMAGE_SIZE_IN_MEGABYTES = 5;
+const MAX_IMAGE_SIZE_IN_BYTES = MAX_IMAGE_SIZE_IN_MEGABYTES * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES: readonly string[] = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+];
+
+/** What the file picker offers - the API enforces the same list. */
+export const IMAGE_ACCEPT = ALLOWED_IMAGE_TYPES.join(',');
+
+/**
+ * Why `file` cannot be uploaded, or null when it can. The API checks the same
+ * rules (plus the file signature); this only saves the round trip of an upload
+ * that was never going to be accepted.
+ */
+export function imageFileError(file: File): string | null {
+  const contentType = file.type.split(';')[0].trim().toLowerCase();
+  if (!ALLOWED_IMAGE_TYPES.includes(contentType)) {
+    return 'Choose a JPEG, PNG or WebP image.';
+  }
+  if (file.size === 0) {
+    return 'That file is empty.';
+  }
+  if (file.size > MAX_IMAGE_SIZE_IN_BYTES) {
+    return `Image cannot exceed ${MAX_IMAGE_SIZE_IN_MEGABYTES} MB.`;
+  }
+  return null;
 }
 
 /** Mirrors `Sheard.Type.PaginationResult<T>`. */
