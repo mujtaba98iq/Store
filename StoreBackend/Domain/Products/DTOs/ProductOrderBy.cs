@@ -4,4 +4,5 @@ public enum ProductOrderBy
 {
     CreatedAt = 1,
     Name = 2,
+    Price = 3,
 }

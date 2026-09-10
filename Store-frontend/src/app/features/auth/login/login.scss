@@ -1,0 +1,90 @@
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.signin {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  padding: clamp(1.5rem, 5vw, 4rem) clamp(1.1rem, 3vw, 2.25rem);
+  background: linear-gradient(160deg, var(--STOR-cream) 0%, var(--STOR-cream-deep) 100%);
+}
+
+.signin__panel {
+  width: min(26rem, 100%);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  background: var(--STOR-surface);
+  border-radius: var(--radius-card);
+  box-shadow: 0 28px 70px rgba(72, 50, 26, 0.18);
+}
+
+.signin__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--STOR-ink-soft);
+}
+
+.signin__title {
+  margin-top: 0.6rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.signin__lede {
+  margin-top: 0.6rem;
+  color: var(--STOR-ink-soft);
+  font-size: 0.9375rem;
+}
+
+.signin__form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.75rem;
+}
+
+.signin__row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.signin__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--STOR-ink-soft);
+}
+
+.signin__control {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--STOR-surface);
+  border: 1px solid var(--STOR-line);
+  border-radius: 2px;
+  font: inherit;
+  color: inherit;
+}
+
+.signin__hint {
+  color: #7c2016;
+  font-size: 0.8125rem;
+}
+
+.signin__alert {
+  padding: 0.75rem 0.9rem;
+  background: rgba(150, 40, 30, 0.08);
+  border: 1px solid rgba(150, 40, 30, 0.28);
+  border-radius: 2px;
+  color: #7c2016;
+  font-size: 0.875rem;
+}
+
+.signin__submit {
+  margin-top: 0.25rem;
+}

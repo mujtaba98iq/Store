@@ -11,9 +11,9 @@ namespace RestApi.Products.Controllers
     [ApiController]
     public class ProductsController(IProductService productService, IProductResponseFormatter responseFormatter) : ControllerBase
     {
-        [Authorize(Roles = "User,Admin")]
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetAll(ProductFilters productFilters)
+        public async Task<IActionResult> GetAll([FromQuery] ProductFilters productFilters)
         {
             var products = await productService.Search(productFilters);
             return Ok(responseFormatter.Many(products.Data, products.TotalCount));
@@ -41,7 +41,7 @@ namespace RestApi.Products.Controllers
             return CreatedAtAction(nameof(GetById), new { id = product.Id }, result);
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [AllowAnonymous]
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ProductResponse), 200)]
         public async Task<IActionResult> GetById(Guid id)

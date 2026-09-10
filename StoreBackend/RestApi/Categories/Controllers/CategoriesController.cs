@@ -11,7 +11,7 @@ namespace RestApi.Categories.Controllers
     [ApiController]
     public class CategoriesController(ICategoryService categoryService, ICategoryResponseFormatter responseFormatter) : ControllerBase
     {
-        [Authorize(Roles = "User,Admin")]
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] CategoryFilters categoryFilters)
         {
@@ -37,7 +37,7 @@ namespace RestApi.Categories.Controllers
             return CreatedAtAction(nameof(GetById), new { id = category.Id }, result);
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [AllowAnonymous]
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(CategoryResponse), 200)]
         public async Task<IActionResult> GetById(Guid id)

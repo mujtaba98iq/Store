@@ -1,0 +1,47 @@
+<section class="signin">
+  <div class="signin__panel">
+    <p class="signin__eyebrow">Store admin</p>
+    <h1 class="signin__title">Sign In</h1>
+    <p class="signin__lede">
+      The catalogue is served by the Store API, which needs a signed-in account.
+    </p>
+
+    <form class="signin__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (error()) {
+        <p class="signin__alert" role="alert">{{ error() }}</p>
+      }
+
+      <div class="signin__row">
+        <label class="signin__label" for="username">Username</label>
+        <input
+          id="username"
+          class="signin__control"
+          type="text"
+          autocomplete="username"
+          formControlName="username"
+        />
+        @if (submitted() && form.controls.username.invalid) {
+          <p class="signin__hint">Enter your username.</p>
+        }
+      </div>
+
+      <div class="signin__row">
+        <label class="signin__label" for="password">Password</label>
+        <input
+          id="password"
+          class="signin__control"
+          type="password"
+          autocomplete="current-password"
+          formControlName="password"
+        />
+        @if (submitted() && form.controls.password.invalid) {
+          <p class="signin__hint">Enter your password.</p>
+        }
+      </div>
+
+      <button class="btn btn--dark signin__submit" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+  </div>
+</section>

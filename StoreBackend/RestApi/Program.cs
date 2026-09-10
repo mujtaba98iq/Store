@@ -96,6 +96,7 @@ app.MapControllers();
 app.MapOpenApi();
 
 app.EnableAutoMigration();
+app.SeedCatalog();
 
 
 

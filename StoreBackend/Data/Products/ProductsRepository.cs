@@ -54,6 +54,9 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
             ProductOrderBy.Name => orderDirection == OrderDirection.Asc
                 ? query.OrderBy(g => g.Name)
                 : query.OrderByDescending(g => g.Name),
+            ProductOrderBy.Price => orderDirection == OrderDirection.Asc
+                ? query.OrderBy(g => g.Price)
+                : query.OrderByDescending(g => g.Price),
             _ => orderDirection == OrderDirection.Asc
                 ? query.OrderBy(c => c.CreatedAt)
                 : query.OrderByDescending(c => c.CreatedAt)
@@ -87,6 +90,11 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
             query = query.Where(c => c.Quantity == policyFilters.Quantity.Value);
         }
 
+        if (policyFilters.CategoryId.HasValue)
+        {
+            query = query.Where(p => p.Categories.Any(c => c.Id == policyFilters.CategoryId.Value));
+        }
+
         return query;
     }
 
@@ -109,7 +117,9 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
 
     public async Task<int> GetTotalCountByFilters(ProductFilters productFilters)
     {
-        var query = dbContext.Products.AsNoTracking().AsQueryable();
+        var query = dbContext.Products.AsNoTracking()
+            .Where(p => p.DeletedAt == null)
+            .AsQueryable();
         query = ApplyFilters(query, productFilters);
         return await query.CountAsync();
     }

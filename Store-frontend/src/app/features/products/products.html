@@ -1,0 +1,148 @@
+<section class="catalog">
+  <div class="catalog__intro">
+    <div class="catalog__intro-inner">
+      <p class="catalog__eyebrow">The collection</p>
+      <h1 class="catalog__title">Everything Your Skin Needs, Nothing It Doesn't</h1>
+      <p class="catalog__lede">
+        Every formula is fragrance-optional, dermatologist-tested and built to layer. Start with one
+        step or build the whole ritual.
+      </p>
+      @if (isAdmin()) {
+        <button class="btn btn--dark catalog__new" type="button" (click)="openCreate()">
+          New product
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="catalog__body">
+    <div class="toolbar">
+      <div class="toolbar__filters" role="group" aria-label="Filter by category">
+        @for (filter of filters(); track filter.label) {
+          <button
+            class="pill"
+            type="button"
+            [class.pill--active]="activeCategoryId() === filter.value"
+            [attr.aria-pressed]="activeCategoryId() === filter.value"
+            (click)="selectCategory(filter.value)"
+          >
+            {{ filter.label }}
+          </button>
+        }
+      </div>
+
+      <div class="toolbar__controls">
+        <div class="field">
+          <label class="sr-only" for="product-search">Search products</label>
+          <svg class="field__icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="m15.6 15.6 4.4 4.4" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+          <input
+            id="product-search"
+            class="field__input"
+            type="search"
+            placeholder="Search the shelf"
+            [value]="searchInput()"
+            (input)="onSearch($event)"
+          />
+        </div>
+
+        <div class="field field--select">
+          <label class="field__label" for="product-sort">Sort</label>
+          <select id="product-sort" class="field__input" (change)="onSortChange($event)">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value" [selected]="option.value === sortKey()">
+                {{ option.label }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <p class="catalog__count" aria-live="polite">
+      @if (products.isLoading()) {
+        Loading the shelf…
+      } @else {
+        {{ totalCount() }} {{ totalCount() === 1 ? 'product' : 'products' }}
+      }
+    </p>
+
+    @if (errorMessage()) {
+      <div class="notice" role="alert">
+        <p class="notice__title">{{ errorMessage() }}</p>
+        <button class="btn btn--light" type="button" (click)="retry()">Try again</button>
+      </div>
+    } @else if (products.isLoading() && !items().length) {
+      <ul class="grid" role="list" aria-hidden="true">
+        @for (placeholder of [1, 2, 3, 4, 5, 6, 7, 8]; track placeholder) {
+          <li class="grid__item">
+            <div class="skeleton"></div>
+          </li>
+        }
+      </ul>
+    } @else if (items().length) {
+      <ul class="grid" role="list">
+        @for (product of items(); track product.id) {
+          <li class="grid__item">
+            <app-product-card
+              [name]="product.name"
+              [price]="product.price ?? 0"
+              [image]="imageFor(product)"
+              [category]="product.categories[0]?.name ?? ''"
+              [editable]="isAdmin()"
+              (add)="addToBag(product)"
+              (edit)="openEdit(product)"
+            />
+            <p class="grid__note">{{ product.description }}</p>
+          </li>
+        }
+      </ul>
+
+      @if (totalPages() > 1) {
+        <nav class="pager" aria-label="Catalogue pages">
+          <button
+            class="btn btn--light"
+            type="button"
+            [disabled]="page() === 1"
+            (click)="goToPage(page() - 1)"
+          >
+            Previous
+          </button>
+          <p class="pager__status" aria-live="polite">Page {{ page() }} of {{ totalPages() }}</p>
+          <button
+            class="btn btn--light"
+            type="button"
+            [disabled]="page() === totalPages()"
+            (click)="goToPage(page() + 1)"
+          >
+            Next
+          </button>
+        </nav>
+      }
+    } @else {
+      <div class="empty">
+        <p class="empty__title">Nothing matches that search just yet.</p>
+        <button class="btn btn--light" type="button" (click)="clearFilters()">Clear filters</button>
+      </div>
+    }
+
+    <p class="catalog__status" role="status">
+      @if (lastAdded()) {
+        {{ lastAdded() }} added to your bag.
+      }
+    </p>
+  </div>
+
+  @if (isFormOpen()) {
+    <app-modal label="the product form" (closed)="closeForm()">
+      <app-product-form
+        [product]="editing()"
+        [categories]="categoryList()"
+        (saved)="onSaved()"
+        (dismissed)="closeForm()"
+      />
+    </app-modal>
+  }
+</section>

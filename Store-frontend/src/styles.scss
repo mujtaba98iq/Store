@@ -1,0 +1,139 @@
+/* STOR — global design tokens and base styles */
+
+:root {
+  /* Palette */
+  --STOR-cream: #f3e7d7;
+  --STOR-cream-deep: #eddcc5;
+  --STOR-surface: #ffffff;
+  --STOR-ink: #241f1b;
+  --STOR-ink-soft: #4c433b;
+  --STOR-line: rgba(36, 31, 27, 0.14);
+
+  /* Type */
+  --font-display: 'Fraunces', 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Shape */
+  --radius-card: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  overscroll-behavior: none;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--STOR-surface);
+  color: var(--STOR-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--STOR-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  padding: 0 clamp(1.25rem, 2.5vw, 2.25rem);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.btn--dark {
+  background: var(--STOR-ink);
+  color: #fff;
+}
+
+.btn--dark:hover {
+  background: #100d0b;
+}
+
+.btn--light {
+  background: var(--STOR-surface);
+  color: var(--STOR-ink);
+  border-color: var(--STOR-line);
+}
+
+.btn--light:hover {
+  background: #f6f1ea;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Screen-reader-only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

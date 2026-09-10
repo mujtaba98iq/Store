@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  /* Pages that fit the viewport (the home hero) fill it exactly; taller pages
+     such as the catalogue grow and let the document scroll. */
+  min-height: 100dvh;
+  background: var(--STOR-surface);
+}
