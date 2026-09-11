@@ -2,6 +2,29 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
 
+## Project structure
+
+The app is layered: **core** (cross-cutting technical concerns), **shared** (reusable,
+feature-agnostic UI) and **modules** (one vertical slice per business capability).
+A page never talks to `HttpClient` directly — it reads a store, the store calls an
+API service, and the API service owns the URL.
+
+```
+src/
+├── environments/                  # apiBaseUrl per build configuration
+├── styles/common/                 # global SCSS partials
+└── app/
+    ├── app.config.ts app.routes.ts    # bootstrap and composition
+    ├── core/                          # interceptors, layout, models, services, utils
+    ├── shared/components/             # modal, product card
+    └── modules/{auth,home,products}/  # api, data-access (stores), models,
+                                       #   pages, components, utils
+```
+
+Path aliases: `@app/*` → `src/app/*`, `@env/*` → `src/environments/*`.
+Feature stores are provided by the page that uses them, so their state dies with
+the page; only genuinely shared services are `providedIn: 'root'`.
+
 ## Development server
 
 To start a local development server, run:

@@ -1,0 +1,21 @@
+/* Design tokens: palette, type and shape. Every component reads these. */
+
+:root {
+  /* Palette */
+  --STOR-cream: #f3e7d7;
+  --STOR-cream-deep: #eddcc5;
+  --STOR-surface: #ffffff;
+  --STOR-ink: #241f1b;
+  --STOR-ink-soft: #4c433b;
+  --STOR-line: rgba(36, 31, 27, 0.14);
+  /* Cool accent behind the primary action on a product card. */
+  --STOR-accent: #17607d;
+  --STOR-accent-deep: #114c63;
+
+  /* Type */
+  --font-display: 'Fraunces', 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Shape */
+  --radius-card: 14px;
+}
