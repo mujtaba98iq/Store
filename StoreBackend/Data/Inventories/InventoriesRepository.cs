@@ -10,6 +10,11 @@ public class InventoriesRepository(ApplicationDbContext dbContext) : IInventorie
     {
         dbContext.Inventories.Add(inventory);
         await dbContext.SaveChangesAsync();
+
+        // The caller formats the row straight away, and the SKU it reports lives on the
+        // variant, which a freshly built entity has no reference to yet.
+        await dbContext.Entry(inventory).Reference(i => i.ProductVariant).LoadAsync();
+
         return inventory;
     }
 
@@ -17,6 +22,9 @@ public class InventoriesRepository(ApplicationDbContext dbContext) : IInventorie
     {
         var query = dbContext.Inventories
             .AsNoTracking()
+            // A stock row is only ever read alongside the variant it stocks, so the
+            // join is part of the listing rather than a lookup per row.
+            .Include(i => i.ProductVariant)
             .Where(i => i.DeletedAt == null)
             .AsQueryable();
 
@@ -60,6 +68,10 @@ public class InventoriesRepository(ApplicationDbContext dbContext) : IInventorie
             InventoryOrderBy.UpdatedAt => orderDirection == OrderDirection.Asc
                 ? query.OrderBy(i => i.UpdatedAt)
                 : query.OrderByDescending(i => i.UpdatedAt),
+            // Ordered through the join, the same way the SKU is filtered and reported.
+            InventoryOrderBy.Sku => orderDirection == OrderDirection.Asc
+                ? query.OrderBy(i => i.ProductVariant!.Sku)
+                : query.OrderByDescending(i => i.ProductVariant!.Sku),
             _ => orderDirection == OrderDirection.Asc
                 ? query.OrderBy(i => i.CreatedAt)
                 : query.OrderByDescending(i => i.CreatedAt)
@@ -76,6 +88,12 @@ public class InventoriesRepository(ApplicationDbContext dbContext) : IInventorie
         if (inventoryFilters.ProductVariantId != null)
         {
             query = query.Where(i => i.ProductVariantId == inventoryFilters.ProductVariantId);
+        }
+
+        if (!string.IsNullOrEmpty(inventoryFilters.Sku))
+        {
+            var sku = inventoryFilters.Sku.ToLower();
+            query = query.Where(i => i.ProductVariant != null && EF.Functions.Like(i.ProductVariant.Sku.ToLower(), $"%{sku}%"));
         }
 
         if (inventoryFilters.MinQuantity.HasValue)
@@ -101,6 +119,7 @@ public class InventoriesRepository(ApplicationDbContext dbContext) : IInventorie
     public async Task<Inventory?> FindById(Guid id)
     {
         var inventory = await dbContext.Inventories
+            .Include(i => i.ProductVariant)
             .FirstOrDefaultAsync(i => i.Id == id && i.DeletedAt == null);
         return inventory;
     }
@@ -108,6 +127,7 @@ public class InventoriesRepository(ApplicationDbContext dbContext) : IInventorie
     public async Task<Inventory?> FindByProductVariantId(Guid productVariantId)
     {
         var inventory = await dbContext.Inventories
+            .Include(i => i.ProductVariant)
             .FirstOrDefaultAsync(i => i.ProductVariantId == productVariantId && i.DeletedAt == null);
         return inventory;
     }

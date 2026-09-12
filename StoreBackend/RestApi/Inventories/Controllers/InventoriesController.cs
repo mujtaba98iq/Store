@@ -76,5 +76,19 @@ namespace RestApi.Inventories.Controllers
 
             return Ok(responseFormatter.One(updatedInventory));
         }
+
+        [HttpDelete("{inventoryId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(object), 404)]
+        public async Task<IActionResult> Delete(Guid inventoryId)
+        {
+            var deleted = await inventoryService.Delete(new DeleteInventoryParams
+            {
+                Id = inventoryId,
+                DeletedById = this.GetUserId()
+            });
+
+            return deleted ? NoContent() : NotFound();
+        }
     }
 }

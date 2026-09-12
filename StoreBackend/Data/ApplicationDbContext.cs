@@ -78,9 +78,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .Ignore(i => i.AvailableQuantity);
 
         // One stock row per variant, otherwise the same units could be counted twice.
+        // Filtered so a variant can be stocked again after its row was deleted.
         modelBuilder.Entity<Inventory>()
             .HasIndex(i => i.ProductVariantId)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("\"DeletedAt\" IS NULL");
 
         modelBuilder.Entity<Inventory>()
             .HasOne(i => i.ProductVariant)

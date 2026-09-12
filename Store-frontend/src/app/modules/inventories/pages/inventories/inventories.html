@@ -1,0 +1,257 @@
+<section class="admin">
+  <div class="admin__intro">
+    <p class="admin__eyebrow">Back of house</p>
+    <h1 class="admin__title">Inventories</h1>
+    <p class="admin__lede">
+      What is on the shelf, what is already promised, and what is left to sell. One stock row per
+      product variant.
+    </p>
+    <button class="btn btn--dark admin__new" type="button" (click)="openCreate()">
+      New stock row
+    </button>
+  </div>
+
+  <div class="admin__body">
+    <div class="toolbar">
+      <div class="toolbar__filters" role="group" aria-label="Filter by availability">
+        <span class="toolbar__legend">Stock</span>
+        @for (option of availabilityFilters; track option.value) {
+          <button
+            class="pill"
+            type="button"
+            [class.pill--active]="availability() === option.value"
+            [attr.aria-pressed]="availability() === option.value"
+            (click)="selectAvailability(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+
+      <div class="toolbar__controls">
+        <div class="field">
+          <label class="sr-only" for="inventory-search">Search stock by SKU</label>
+          <svg class="field__icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="m15.6 15.6 4.4 4.4" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+          <input
+            id="inventory-search"
+            class="field__input"
+            type="search"
+            placeholder="Search SKUs"
+            [value]="searchInput()"
+            (input)="onSearch($event)"
+          />
+        </div>
+
+        <div class="field field--range">
+          <label class="field__label" for="inventory-min">On hand</label>
+          <input
+            id="inventory-min"
+            class="field__input field__input--count"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            step="1"
+            placeholder="Min"
+            [value]="minInput()"
+            (input)="onMinQuantity($event)"
+          />
+          <span class="field__dash" aria-hidden="true">–</span>
+          <label class="sr-only" for="inventory-max">Most units on hand</label>
+          <input
+            id="inventory-max"
+            class="field__input field__input--count"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            step="1"
+            placeholder="Max"
+            [value]="maxInput()"
+            (input)="onMaxQuantity($event)"
+          />
+        </div>
+
+        <div class="field field--select">
+          <label class="field__label" for="inventory-sort">Sort</label>
+          <select id="inventory-sort" class="field__input" (change)="onSortChange($event)">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value" [selected]="option.value === sortKey()">
+                {{ option.label }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <p class="admin__count" aria-live="polite">
+      @if (isLoading()) {
+        Loading stock…
+      } @else {
+        {{ totalCount() }} {{ totalCount() === 1 ? 'stock row' : 'stock rows' }}
+      }
+    </p>
+
+    @if (errorMessage()) {
+      <div class="notice" role="alert">
+        <p class="notice__title">{{ errorMessage() }}</p>
+        <button class="btn btn--light" type="button" (click)="retry()">Try again</button>
+      </div>
+    } @else if (isLoading() && !items().length) {
+      <div class="skeletons" aria-hidden="true">
+        @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
+          <div class="skeleton"></div>
+        }
+      </div>
+    } @else if (items().length) {
+      <div class="table-wrap">
+        <table class="table">
+          <caption class="sr-only">
+            Stock rows, page
+            {{
+              page()
+            }}
+            of
+            {{
+              totalPages()
+            }}
+          </caption>
+          <thead>
+            <tr>
+              <th class="table__num" scope="col">#</th>
+              <th scope="col">SKU</th>
+              <th class="table__count-head" scope="col">On hand</th>
+              <th class="table__count-head" scope="col">Reserved</th>
+              <th class="table__count-head" scope="col">Available</th>
+              <th scope="col">Created</th>
+              <th class="table__actions-head" scope="col">
+                <span class="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (inventory of items(); track inventory.id; let i = $index) {
+              <tr [class.row--busy]="deletingId() === inventory.id">
+                <td class="table__num">{{ rowNumber(i) }}</td>
+                <th class="table__name" scope="row">
+                  <span class="sku" [class.sku--missing]="!inventory.sku">
+                    {{ labelFor(inventory) }}
+                  </span>
+                </th>
+                <td class="table__count">{{ inventory.quantity }}</td>
+                <td class="table__count table__count--soft">{{ inventory.reservedQuantity }}</td>
+                <td class="table__count">
+                  @if (isSoldOut(inventory)) {
+                    <span class="stock stock--out">Sold out</span>
+                  } @else {
+                    <span class="stock" [class.stock--low]="isLow(inventory)">
+                      {{ inventory.availableQuantity }}
+                    </span>
+                  }
+                </td>
+                <td class="table__date">
+                  <time [attr.datetime]="inventory.createdAt">
+                    {{ inventory.createdAt | date: 'mediumDate' }}
+                  </time>
+                  @if (inventory.updatedAt) {
+                    <span class="table__note">
+                      edited {{ inventory.updatedAt | date: 'mediumDate' }}
+                    </span>
+                  }
+                </td>
+                <td class="table__actions">
+                  <button
+                    class="link-btn"
+                    type="button"
+                    [disabled]="deletingId() === inventory.id"
+                    (click)="openEdit(inventory)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="link-btn link-btn--danger"
+                    type="button"
+                    [disabled]="deletingId() === inventory.id"
+                    (click)="askToDelete(inventory)"
+                  >
+                    {{ deletingId() === inventory.id ? 'Deleting…' : 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <nav class="pager" aria-label="Stock pages">
+          <button
+            class="btn btn--light"
+            type="button"
+            [disabled]="page() === 1"
+            (click)="goToPage(page() - 1)"
+          >
+            Previous
+          </button>
+          <p class="pager__status" aria-live="polite">Page {{ page() }} of {{ totalPages() }}</p>
+          <button
+            class="btn btn--light"
+            type="button"
+            [disabled]="page() === totalPages()"
+            (click)="goToPage(page() + 1)"
+          >
+            Next
+          </button>
+        </nav>
+      }
+    } @else {
+      <div class="empty">
+        @if (hasFilters()) {
+          <p class="empty__title">No stock matches those filters.</p>
+          <button class="btn btn--light" type="button" (click)="clearFilters()">
+            Clear filters
+          </button>
+        } @else {
+          <p class="empty__title">No stock rows yet.</p>
+          <button class="btn btn--dark" type="button" (click)="openCreate()">
+            Create the first one
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  @if (isFormOpen()) {
+    <app-modal label="the stock form" (closed)="closeForm()">
+      <app-inventory-form
+        [inventory]="editing()"
+        [variants]="variantOptions()"
+        [variantsLoading]="variantsLoading()"
+        (saved)="onSaved()"
+        (dismissed)="closeForm()"
+      />
+    </app-modal>
+  }
+
+  @if (pendingDelete(); as inventory) {
+    <app-modal label="delete confirmation" (closed)="cancelDelete()">
+      <div class="confirm">
+        <h2 class="confirm__title">Delete stock for {{ labelFor(inventory) }}?</h2>
+        <p class="confirm__body">
+          The variant stops being stocked and drops out of this listing. Its
+          {{ inventory.quantity }} unit{{ inventory.quantity === 1 ? '' : 's' }} on hand are no
+          longer counted, and orders already placed against them are left alone. The variant can be
+          stocked again afterwards.
+        </p>
+        <div class="confirm__actions">
+          <button class="btn btn--light" type="button" (click)="cancelDelete()">Cancel</button>
+          <button class="btn btn--danger" type="button" (click)="confirmDelete()">
+            Delete stock row
+          </button>
+        </div>
+      </div>
+    </app-modal>
+  }
+</section>

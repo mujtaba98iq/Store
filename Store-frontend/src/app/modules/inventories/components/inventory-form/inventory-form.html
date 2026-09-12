@@ -1,0 +1,99 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h2 class="form__title">{{ title() }}</h2>
+
+  @if (isEdit()) {
+    <div class="form__row">
+      <span class="form__label">Product variant</span>
+      <p class="form__fixed">{{ editingSku() }}</p>
+      <p class="form__hint">A stock row stays with the variant it was opened against.</p>
+    </div>
+  } @else {
+    <div class="form__row">
+      <label class="form__label" for="inventory-variant">Product variant</label>
+      <select id="inventory-variant" class="form__control" formControlName="productVariantId">
+        <option value="" disabled>
+          {{ variantsLoading() ? 'Loading variants…' : 'Choose a variant' }}
+        </option>
+        @for (variant of variants(); track variant.id) {
+          <option [value]="variant.id">
+            {{ variant.sku }}{{ variant.isActive ? '' : ' (inactive)' }}
+          </option>
+        }
+      </select>
+      @if (showError('productVariantId')) {
+        <p class="form__hint form__hint--error">Choose the variant this stock belongs to.</p>
+      } @else {
+        <p class="form__hint">{{ variantHint }}</p>
+      }
+      @if (!variantsLoading() && !variants().length) {
+        <p class="form__hint form__hint--error">
+          No product variants to stock yet. Create one first.
+        </p>
+      }
+      @for (message of messagesFor('productVariantId'); track message) {
+        <p class="form__hint form__hint--error">{{ message }}</p>
+      }
+    </div>
+  }
+
+  <div class="form__pair">
+    <div class="form__row">
+      <label class="form__label" for="inventory-quantity">On hand</label>
+      <input
+        id="inventory-quantity"
+        class="form__control"
+        type="number"
+        inputmode="numeric"
+        min="0"
+        step="1"
+        formControlName="quantity"
+      />
+      @if (showError('quantity')) {
+        <p class="form__hint form__hint--error">A whole number of units, zero or more.</p>
+      } @else {
+        <p class="form__hint">{{ quantityHint }}</p>
+      }
+      @for (message of messagesFor('quantity'); track message) {
+        <p class="form__hint form__hint--error">{{ message }}</p>
+      }
+    </div>
+
+    <div class="form__row">
+      <label class="form__label" for="inventory-reserved">Reserved</label>
+      <input
+        id="inventory-reserved"
+        class="form__control"
+        type="number"
+        inputmode="numeric"
+        min="0"
+        step="1"
+        formControlName="reservedQuantity"
+      />
+      @if (showReservedTooHigh()) {
+        <p class="form__hint form__hint--error">Reserved cannot be more than what is on hand.</p>
+      } @else if (showError('reservedQuantity')) {
+        <p class="form__hint form__hint--error">A whole number of units, zero or more.</p>
+      } @else {
+        <p class="form__hint">{{ reservedHint }}</p>
+      }
+      @for (message of messagesFor('reservedQuantity'); track message) {
+        <p class="form__hint form__hint--error">{{ message }}</p>
+      }
+    </div>
+  </div>
+
+  <!-- The count the shop actually sells from, so it is shown rather than left to
+       be worked out from the two boxes above. -->
+  <p class="form__preview" aria-live="polite">
+    Available to sell: <strong>{{ availablePreview() }}</strong>
+  </p>
+
+  <div class="form__actions">
+    <button class="btn btn--light" type="button" (click)="cancel()" [disabled]="saving()">
+      Cancel
+    </button>
+    <button class="btn btn--dark" type="submit" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : isEdit() ? 'Save changes' : 'Create stock row' }}
+    </button>
+  </div>
+</form>

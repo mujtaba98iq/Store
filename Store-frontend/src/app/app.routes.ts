@@ -36,6 +36,15 @@ export const routes: Routes = [
     loadComponent: () => import('./modules/users/pages/users/users').then((m) => m.Users),
   },
   {
+    // Stock levels are readable by any signed-in account, but every control here
+    // writes, and the API puts all of those behind the Admin role.
+    path: 'inventories',
+    title: 'STOR — Inventories',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./modules/inventories/pages/inventories/inventories').then((m) => m.Inventories),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

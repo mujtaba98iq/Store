@@ -45,6 +45,12 @@ export class Header {
       adminOnly: true,
     },
     {
+      label: 'Inventories',
+      link: '/inventories',
+      activeClass: 'nav__link--active',
+      adminOnly: true,
+    },
+    {
       label: 'Users',
       link: '/users',
       activeClass: 'nav__link--active',

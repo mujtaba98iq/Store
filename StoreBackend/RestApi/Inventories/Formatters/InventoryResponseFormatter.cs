@@ -21,6 +21,7 @@ public class InventoryResponseFormatter : IInventoryResponseFormatter
         {
             Id = inventory.Id.ToString(),
             ProductVariantId = inventory.ProductVariantId.ToString(),
+            Sku = inventory.ProductVariant?.Sku,
             Quantity = inventory.Quantity,
             ReservedQuantity = inventory.ReservedQuantity,
             AvailableQuantity = inventory.AvailableQuantity,

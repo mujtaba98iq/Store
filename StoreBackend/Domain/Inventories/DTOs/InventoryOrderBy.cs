@@ -7,4 +7,5 @@ public enum InventoryOrderBy
     ReservedQuantity = 3,
     AvailableQuantity = 4,
     UpdatedAt = 5,
+    Sku = 6,
 }

@@ -8,10 +8,10 @@ namespace Domain.Inventories
     {
         public async Task<Inventory> Create(CreateInventoryParams createInventoryParams)
         {
-            _ = await productVariantsRepository.FindById(createInventoryParams.ProductVariantId)
+            var productVariant = await productVariantsRepository.FindById(createInventoryParams.ProductVariantId)
                 ?? throw new ResourceNotFoundException("ProductVariant", $"Product variant with ID {createInventoryParams.ProductVariantId} not found");
 
-            await EnsureProductVariantIsNotStockedYet(createInventoryParams.ProductVariantId);
+            await EnsureProductVariantIsNotStockedYet(createInventoryParams.ProductVariantId, productVariant.Sku);
 
             var quantity = createInventoryParams.Quantity ?? 0;
             var reservedQuantity = createInventoryParams.ReservedQuantity ?? 0;
@@ -72,12 +72,35 @@ namespace Domain.Inventories
             return await inventoriesRepository.Update(inventory);
         }
 
-        private async Task EnsureProductVariantIsNotStockedYet(Guid productVariantId)
+        /// <inheritdoc />
+        public async Task<bool> Delete(DeleteInventoryParams deleteInventoryParams)
+        {
+            var inventory = await inventoriesRepository.FindById(deleteInventoryParams.Id);
+            if (inventory is null)
+            {
+                return false;
+            }
+
+            // Soft delete: the variant keeps its history, and every listing skips rows
+            // with a DeletedAt. The unique index is filtered the same way, so the variant
+            // can be stocked again afterwards.
+            inventory.DeletedAt = DateTime.UtcNow;
+            inventory.DeletedById = deleteInventoryParams.DeletedById;
+
+            await inventoriesRepository.Update(inventory);
+            return true;
+        }
+
+        /// <summary>
+        /// The SKU is what the caller chose the variant by, so it is what the refusal
+        /// names it by - a GUID would leave them nothing to act on.
+        /// </summary>
+        private async Task EnsureProductVariantIsNotStockedYet(Guid productVariantId, string sku)
         {
             var existing = await inventoriesRepository.FindByProductVariantId(productVariantId);
             if (existing != null)
             {
-                throw new ResourceAlreadyExistsException("Inventory", $"product variant {productVariantId}");
+                throw new ResourceAlreadyExistsException("Inventory", $"SKU {sku}");
             }
         }
 
