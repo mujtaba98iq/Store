@@ -1,0 +1,308 @@
+:host {
+  /* Matches the header's horizontal padding so the page aligns with the brand. */
+  --page-x: clamp(1.1rem, 3vw, 2.25rem);
+
+  display: block;
+}
+
+/* The pills come from src/styles/common/_toolbar.scss. */
+
+.detail {
+  padding: clamp(1.25rem, 3vw, 2rem) var(--page-x) clamp(3rem, 6vw, 5rem);
+}
+
+.detail__crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--STOR-ink-soft);
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+}
+
+.detail__crumbs a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.detail__layout {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+}
+
+/* Side by side once there is room for the image to stay large enough to read. */
+@media (min-width: 860px) {
+  .detail__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.detail__media {
+  overflow: hidden;
+  background: var(--STOR-cream);
+  border-radius: var(--radius-card);
+}
+
+.detail__media img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.detail__fallback {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  color: var(--STOR-ink-soft);
+  opacity: 0.6;
+}
+
+.detail__pane {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.detail__eyebrow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--STOR-ink-soft);
+}
+
+.detail__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.detail__price {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+}
+
+.detail__price-missing {
+  color: var(--STOR-ink-soft);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+}
+
+.detail__copy {
+  max-width: 60ch;
+  color: var(--STOR-ink-soft);
+  line-height: 1.6;
+}
+
+/* Everything that turns the page into a cart line, boxed off from the copy. */
+.buy {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
+  background: var(--STOR-surface);
+  border: 1px solid var(--STOR-line);
+  border-radius: var(--radius-card);
+}
+
+.buy__row {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.buy__legend {
+  color: var(--STOR-ink-soft);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.buy__variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* A SKU is a code, so it is set as one, with the price it sells at underneath. */
+.buy__variants .pill {
+  display: grid;
+  gap: 0.1rem;
+  min-height: 3rem;
+  padding-block: 0.35rem;
+  text-align: start;
+}
+
+.pill__sku {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+}
+
+.pill__price {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--STOR-line);
+  border-radius: 2px;
+}
+
+.stepper__btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  background: none;
+  border: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.stepper__btn:hover:not(:disabled) {
+  background: #f6f1ea;
+}
+
+.stepper__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stepper__input {
+  width: 3.5rem;
+  height: 2.75rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-inline: 1px solid var(--STOR-line);
+  font: inherit;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  /* The arrows duplicate the two buttons either side of it. */
+  appearance: textfield;
+}
+
+.stepper__input::-webkit-outer-spin-button,
+.stepper__input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.stepper__input:focus {
+  outline: none;
+}
+
+.stepper:focus-within {
+  outline: 2px solid var(--STOR-ink);
+  outline-offset: 1px;
+}
+
+.buy__total {
+  color: var(--STOR-ink-soft);
+  font-size: 0.9375rem;
+}
+
+.buy__add {
+  width: 100%;
+}
+
+.buy__link {
+  justify-self: center;
+  color: var(--STOR-ink-soft);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.buy__status {
+  color: var(--STOR-ink-soft);
+  font-size: 0.9375rem;
+}
+
+/* Signing in is the only way past this, so it is the only thing offered. */
+.buy__gate {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+}
+
+.buy__gate-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+}
+
+.buy__gate-body {
+  color: var(--STOR-ink-soft);
+  font-size: 0.9375rem;
+}
+
+.buy__gate .btn {
+  margin-top: 0.5rem;
+}
+
+.notice {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  color: #7c2016;
+  background: rgba(150, 40, 30, 0.06);
+  border: 1px solid rgba(150, 40, 30, 0.22);
+  border-radius: var(--radius-card);
+}
+
+.notice__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: clamp(2.5rem, 6vw, 4.5rem) 1.5rem;
+  background: var(--STOR-cream);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+
+.empty__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+}
+
+.skeleton {
+  background: linear-gradient(180deg, #f3ede4 0%, #e9e0d3 100%);
+  border-radius: 2px;
+}
+
+.skeleton--media {
+  aspect-ratio: 1;
+  border-radius: var(--radius-card);
+}
+
+.skeleton--line {
+  height: 2rem;
+}
+
+.skeleton--block {
+  height: 12rem;
+  border-radius: var(--radius-card);
+}
+
+.buy__note {
+  color: var(--STOR-ink-soft);
+  font-size: 0.8125rem;
+  text-align: center;
+}

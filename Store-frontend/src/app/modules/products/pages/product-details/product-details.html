@@ -1,0 +1,171 @@
+<section class="detail">
+  <nav class="detail__crumbs" aria-label="Breadcrumb">
+    <a routerLink="/products">The collection</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">{{ product()?.name ?? 'Product' }}</span>
+  </nav>
+
+  @if (errorMessage()) {
+    <div class="notice" role="alert">
+      <p class="notice__title">{{ errorMessage() }}</p>
+      <div class="notice__actions">
+        <button class="btn btn--light" type="button" (click)="retry()">Try again</button>
+        <a class="btn btn--light" routerLink="/products">Back to the collection</a>
+      </div>
+    </div>
+  } @else if (isLoading() && !product()) {
+    <div class="detail__layout" aria-hidden="true">
+      <div class="skeleton skeleton--media"></div>
+      <div class="detail__pane">
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--line"></div>
+        <div class="skeleton skeleton--block"></div>
+      </div>
+    </div>
+  } @else if (product(); as item) {
+    <div class="detail__layout">
+      <div class="detail__media">
+        @if (image()) {
+          <img [src]="image()" [alt]="item.name" />
+        } @else {
+          <div class="detail__fallback" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="44" height="44" fill="none">
+              <rect
+                x="15"
+                y="18"
+                width="18"
+                height="22"
+                rx="4"
+                stroke="currentColor"
+                stroke-width="1.6"
+              />
+              <path d="M20 18v-6h8v6" stroke="currentColor" stroke-width="1.6" />
+            </svg>
+          </div>
+        }
+      </div>
+
+      <div class="detail__pane">
+        @if (categoryName()) {
+          <p class="detail__eyebrow">{{ categoryName() }}</p>
+        }
+        <h1 class="detail__title">{{ item.name }}</h1>
+
+        <p class="detail__price">
+          @if (unitPrice() !== null) {
+            {{ unitPrice() | currency: 'USD' }}
+          } @else {
+            <span class="detail__price-missing">Price on request</span>
+          }
+        </p>
+
+        @if (item.description) {
+          <p class="detail__copy">{{ item.description }}</p>
+        }
+
+        <!-- Variant, quantity and the button are one decision, so they sit in one
+             group rather than as three loose controls. -->
+        <div class="buy">
+          @if (hasNoVariants()) {
+            <p class="buy__status">
+              This product is not on sale yet — no size has been opened for it.
+            </p>
+          } @else {
+            <div class="buy__row" role="group" aria-labelledby="variant-legend">
+              <p class="buy__legend" id="variant-legend">Variant</p>
+              <div class="buy__variants">
+                @for (variant of variants(); track variant.id) {
+                  <button
+                    class="pill"
+                    type="button"
+                    [class.pill--active]="selectedVariantId() === variant.id"
+                    [attr.aria-pressed]="selectedVariantId() === variant.id"
+                    (click)="selectVariant(variant.id)"
+                  >
+                    <span class="pill__sku">{{ variant.sku }}</span>
+                    @if (priceOf(variant) !== null) {
+                      <span class="pill__price">{{ priceOf(variant) | currency: 'USD' }}</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="buy__row">
+              <label class="buy__legend" for="quantity">Quantity</label>
+              <div class="stepper">
+                <button
+                  class="stepper__btn"
+                  type="button"
+                  aria-label="One fewer"
+                  [disabled]="quantity() <= 1"
+                  (click)="stepQuantity(-1)"
+                >
+                  −
+                </button>
+                <input
+                  id="quantity"
+                  class="stepper__input"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  [max]="maxQuantity"
+                  step="1"
+                  [value]="quantity()"
+                  (input)="onQuantityInput($event)"
+                />
+                <button
+                  class="stepper__btn"
+                  type="button"
+                  aria-label="One more"
+                  [disabled]="quantity() >= maxQuantity"
+                  (click)="stepQuantity(1)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            @if (unitPrice() !== null && quantity() > 1) {
+              <p class="buy__total" aria-live="polite">
+                {{ quantity() }} × {{ unitPrice() | currency: 'USD' }} =
+                <strong>{{ lineTotal() | currency: 'USD' }}</strong>
+              </p>
+            }
+
+            <!-- A cart belongs to an account, so a visitor is sent to sign in
+                 rather than being given a button the API would refuse. The choice
+                 they made here is what they come back to. -->
+            @if (isSignedIn()) {
+              <button
+                class="btn btn--dark buy__add"
+                type="button"
+                [disabled]="!canAddToCart()"
+                (click)="addToCart()"
+              >
+                {{ isAdding() ? 'Adding…' : 'Add to Cart' }}
+              </button>
+
+              <a class="buy__link" routerLink="/cart">View your cart</a>
+            } @else {
+              <a
+                class="btn btn--dark buy__add"
+                routerLink="/login"
+                [queryParams]="{ returnUrl: returnUrl() }"
+                >Sign in to add to cart</a
+              >
+              <p class="buy__note">
+                A cart belongs to an account, so this one needs you signed in.
+              </p>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="empty">
+      <p class="empty__title">That product is no longer on the shelf.</p>
+      <a class="btn btn--light" routerLink="/products">Back to the collection</a>
+    </div>
+  }
+</section>

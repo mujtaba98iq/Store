@@ -79,6 +79,32 @@
   background: rgba(36, 31, 27, 0.06);
 }
 
+/* The bag carries a count, so it needs somewhere to hang it from. */
+.icon-btn--cart {
+  position: relative;
+}
+
+/* Sits on the lip of the bag rather than inside it, where the strokes would
+   fight the digits. It grows with the number instead of clipping it. */
+.icon-btn__badge {
+  position: absolute;
+  top: 0.15rem;
+  inset-inline-end: 0.05rem;
+  display: grid;
+  place-items: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding-inline: 0.3rem;
+  background: var(--STOR-accent);
+  border: 2px solid var(--STOR-surface);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 719px) {
   .site-header {
     grid-template-columns: 1fr auto;

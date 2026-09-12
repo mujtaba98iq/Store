@@ -1,5 +1,6 @@
 import { OrderDirection } from '@app/core/models/enums/order-direction';
 import { Category } from '@app/core/models/interfaces/category';
+import { ProductVariant } from './product-variant.model';
 
 /** Mirrors `RestApi.ProductImages.ProductImageResponse`. */
 export interface ProductImage {
@@ -21,6 +22,13 @@ export interface Product {
   readonly createdAt: string;
   readonly updatedAt: string | null;
   readonly categories: readonly Category[];
+  /**
+   * The forms this product is sold in, carried by the API alongside the product
+   * so a product page does not have to fetch them separately - and so a visitor
+   * without a token can see them, which the variants endpoint would not allow.
+   * Live variants, inactive ones included: what is purchasable is filtered here.
+   */
+  readonly variants: readonly ProductVariant[];
   readonly images: readonly ProductImage[];
 }
 

@@ -14,6 +14,7 @@ function product(overrides: Partial<Product> = {}): Product {
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: null,
     categories: [],
+    variants: [],
     images: [],
     ...overrides,
   };

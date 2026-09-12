@@ -1,0 +1,175 @@
+<section class="cart">
+  <div class="cart__intro">
+    <p class="cart__eyebrow">Your bag</p>
+    <h1 class="cart__title">Cart</h1>
+    <p class="cart__lede" aria-live="polite">
+      @if (isLoading() && !isLoaded()) {
+        Fetching your cart…
+      } @else if (isEmpty()) {
+        Nothing in the bag yet. Pick a product, choose a size, and it lands here.
+      } @else {
+        {{ unitCount() }} {{ unitCount() === 1 ? 'item' : 'items' }} across {{ lineCount() }}
+        {{ lineCount() === 1 ? 'line' : 'lines' }}.
+      }
+    </p>
+  </div>
+
+  <div class="cart__body">
+    @if (errorMessage()) {
+      <div class="notice" role="alert">
+        <p class="notice__title">{{ errorMessage() }}</p>
+        <button class="btn btn--light" type="button" (click)="retry()">Try again</button>
+      </div>
+    } @else if (isLoading() && !isLoaded()) {
+      <div class="skeletons" aria-hidden="true">
+        @for (placeholder of [1, 2, 3]; track placeholder) {
+          <div class="skeleton"></div>
+        }
+      </div>
+    } @else if (lines().length) {
+      <div class="cart__layout">
+        <ul class="lines" role="list">
+          @for (line of lines(); track line.item.id) {
+            <li class="line" [class.line--busy]="pendingItemId() === line.item.id || isClearing()">
+              <div class="line__head">
+                <h2 class="line__name">
+                  @if (line.productId) {
+                    <a [routerLink]="['/products', line.productId]">{{ line.label }}</a>
+                  } @else {
+                    {{ line.label }}
+                  }
+                </h2>
+                @if (line.sku) {
+                  <p class="line__sku">{{ line.sku }}</p>
+                } @else {
+                  <p class="line__sku line__sku--missing">Variant no longer listed</p>
+                }
+              </div>
+
+              <p class="line__unit">
+                {{ line.item.unitPrice | currency: 'USD' }}
+                <span class="line__unit-label">each</span>
+              </p>
+
+              <div class="line__quantity">
+                <label class="sr-only" [attr.for]="'quantity-' + line.item.id">
+                  Quantity of {{ line.label }}
+                </label>
+                <div class="stepper">
+                  <button
+                    class="stepper__btn"
+                    type="button"
+                    [attr.aria-label]="'One fewer ' + line.label"
+                    [disabled]="isBusy()"
+                    (click)="stepQuantity(line, -1)"
+                  >
+                    −
+                  </button>
+                  <input
+                    class="stepper__input"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    step="1"
+                    [id]="'quantity-' + line.item.id"
+                    [value]="line.item.quantity"
+                    [disabled]="isBusy()"
+                    (change)="onQuantityInput(line, $event)"
+                  />
+                  <button
+                    class="stepper__btn"
+                    type="button"
+                    [attr.aria-label]="'One more ' + line.label"
+                    [disabled]="isBusy()"
+                    (click)="stepQuantity(line, 1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <p class="line__subtotal">{{ line.item.subtotal | currency: 'USD' }}</p>
+
+              <button
+                class="link-btn link-btn--danger line__remove"
+                type="button"
+                [disabled]="isBusy()"
+                (click)="askToRemove(line)"
+              >
+                {{ pendingItemId() === line.item.id ? 'Working…' : 'Remove' }}
+              </button>
+            </li>
+          }
+        </ul>
+
+        <aside class="summary" aria-label="Order summary">
+          <h2 class="summary__title">Summary</h2>
+          <dl class="summary__rows">
+            <div class="summary__row">
+              <dt>Items</dt>
+              <dd>{{ unitCount() }}</dd>
+            </div>
+            <div class="summary__row summary__row--total">
+              <dt>Total</dt>
+              <dd>{{ totalAmount() | currency: 'USD' }}</dd>
+            </div>
+          </dl>
+          <!-- Prices are what each line sold for when it was last touched, not a
+               live quote, so the cart says so rather than implying otherwise. -->
+          <p class="summary__note">
+            Delivery is worked out at checkout. Line prices are held from when each was added.
+          </p>
+          <a class="btn btn--light summary__continue" routerLink="/products">Continue shopping</a>
+          <button
+            class="link-btn link-btn--danger summary__clear"
+            type="button"
+            [disabled]="isBusy()"
+            (click)="askToClear()"
+          >
+            {{ isClearing() ? 'Emptying…' : 'Empty the cart' }}
+          </button>
+        </aside>
+      </div>
+    } @else {
+      <div class="empty">
+        <p class="empty__title">Your cart is empty.</p>
+        <a class="btn btn--dark" routerLink="/products">Shop the collection</a>
+      </div>
+    }
+  </div>
+
+  @if (pendingRemoval(); as line) {
+    <app-modal label="remove confirmation" (closed)="cancelRemoval()">
+      <div class="confirm">
+        <h2 class="confirm__title">Remove {{ line.label }}?</h2>
+        <p class="confirm__body">
+          The line leaves your cart, including all
+          {{ line.item.quantity }} unit{{ line.item.quantity === 1 ? '' : 's' }} of it. Nothing else
+          in the cart changes, and you can add it again from the product page.
+        </p>
+        <div class="confirm__actions">
+          <button class="btn btn--light" type="button" (click)="cancelRemoval()">Keep it</button>
+          <button class="btn btn--danger" type="button" (click)="confirmRemoval()">Remove</button>
+        </div>
+      </div>
+    </app-modal>
+  }
+
+  @if (isClearConfirmOpen()) {
+    <app-modal label="empty cart confirmation" (closed)="cancelClear()">
+      <div class="confirm">
+        <h2 class="confirm__title">Empty your cart?</h2>
+        <p class="confirm__body">
+          All {{ lineCount() }} line{{ lineCount() === 1 ? '' : 's' }} go at once. The cart itself
+          stays, ready for the next thing you add.
+        </p>
+        <div class="confirm__actions">
+          <button class="btn btn--light" type="button" (click)="cancelClear()">Cancel</button>
+          <button class="btn btn--danger" type="button" (click)="confirmClear()">
+            Empty the cart
+          </button>
+        </div>
+      </div>
+    </app-modal>
+  }
+</section>

@@ -55,6 +55,27 @@ export class ApiProductsService {
     );
   }
 
+  /**
+   * One product, refetched whenever the id changes. Anonymous like the listing, so
+   * a visitor can read a product page before they have an account.
+   *
+   * No request is issued until there is an id to ask for - the route parameter
+   * arrives a tick after the page does. A failed read is reported by the page that
+   * asked for it, which can offer a retry.
+   */
+  getById(id: Signal<string>) {
+    return httpResource<Product>(
+      () =>
+        id()
+          ? {
+              url: `${PRODUCTS_URL}/${id()}`,
+              context: errorNotification(ErrorNotification.Silent),
+            }
+          : undefined,
+      { injector: this.injector },
+    );
+  }
+
   create(body: CreateProductBody): Observable<Product> {
     return this.http.post<Product>(PRODUCTS_URL, body, {
       context: errorNotification(ErrorNotification.FieldsInline),

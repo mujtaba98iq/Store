@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthStore } from '@app/core/services/common/auth-store';
-import { ToastService } from '@app/core/services/common/toast';
 import { Modal } from '@app/shared/components/modal/modal';
 import { ProductCard } from '@app/shared/components/product-card/product-card';
 import { ProductForm } from '../../components/product-form/product-form';
@@ -19,7 +19,7 @@ import { productImageUrl } from '../../utils/product-image';
 export class Products {
   private readonly auth = inject(AuthStore);
   private readonly store = inject(ProductsStore);
-  private readonly toasts = inject(ToastService);
+  private readonly router = inject(Router);
 
   protected readonly isAdmin = this.auth.isAdmin;
 
@@ -87,8 +87,11 @@ export class Products {
     this.store.reload();
   }
 
-  // No cart service yet - announce the action so the button is not a dead end.
-  protected addToBag(product: Product): void {
-    this.toasts.info(`${product.name} added to your bag.`);
+  /**
+   * A product is not buyable on its own - a variant is what goes in a cart - so the
+   * card opens the product page, where the size and the count are chosen.
+   */
+  protected openDetails(product: Product): void {
+    void this.router.navigate(['/products', product.id]);
   }
 }

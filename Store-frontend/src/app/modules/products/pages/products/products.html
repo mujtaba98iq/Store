@@ -93,7 +93,8 @@
               [category]="product.categories[0]?.name ?? ''"
               [description]="product.description"
               [editable]="isAdmin()"
-              (add)="addToBag(product)"
+              addLabel="Choose options"
+              (add)="openDetails(product)"
               (edit)="openEdit(product)"
             />
           </li>

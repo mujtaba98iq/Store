@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { PaginatedResult } from '@app/core/models/interfaces/api-response';
 import { Category } from '@app/core/models/interfaces/category';
 import { Product } from '../../models/product.model';
@@ -19,6 +20,7 @@ function product(overrides: Partial<Product> = {}): Product {
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: null,
     categories: [MOISTURISERS],
+    variants: [],
     images: [],
     ...overrides,
   };
@@ -147,6 +149,18 @@ describe('Products', () => {
 
     expect(element.querySelector('.notice')).not.toBeNull();
     expect(element.querySelector('.grid')).toBeNull();
+  });
+
+  it('opens a product rather than carting it, which needs a variant first', async () => {
+    await flushProducts(page([product()]));
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    const add = Array.from(element.querySelectorAll<HTMLButtonElement>('.card__add')).at(0);
+    expect(add?.textContent?.trim()).toBe('Choose options');
+
+    add!.click();
+
+    expect(navigate).toHaveBeenCalledWith(['/products', 'p1']);
   });
 
   it('hides the admin controls from a signed-out visitor', async () => {

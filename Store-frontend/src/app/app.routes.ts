@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from '@app/core/guards/admin-guard';
+import { authGuard } from '@app/core/guards/auth-guard';
 
 export const routes: Routes = [
   {
@@ -18,6 +19,25 @@ export const routes: Routes = [
     title: 'STOR — Shop the Collection',
     loadComponent: () =>
       import('./modules/products/pages/products/products').then((m) => m.Products),
+  },
+  {
+    // One product, and the two choices that turn it into a cart line. Anonymous
+    // like the listing: the product itself reads without a token, and the page
+    // offers sign-in where the sizes would be, because the API guards those.
+    path: 'products/:id',
+    title: 'STOR — Product',
+    loadComponent: () =>
+      import('./modules/products/pages/product-details/product-details').then(
+        (m) => m.ProductDetails,
+      ),
+  },
+  {
+    // The API addresses a cart by the caller's token, so there is nothing here to
+    // show a visitor without one.
+    path: 'cart',
+    title: 'STOR — Your Cart',
+    canActivate: [authGuard],
+    loadComponent: () => import('./modules/cart/pages/cart/cart').then((m) => m.Cart),
   },
   {
     // Every control on this page is an admin one, so the whole route is guarded.

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { IsActiveMatchOptions, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '@app/core/services/common/auth-store';
+import { CartStore } from '@app/core/services/common/cart-store';
 import { SessionService } from '@app/core/services/common/session';
 
 interface NavItem {
@@ -24,9 +25,26 @@ export class Header {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthStore);
+  private readonly cart = inject(CartStore);
 
   protected readonly isSignedIn = this.auth.isSignedIn;
   protected readonly email = this.auth.email;
+
+  /**
+   * Units in the cart, not lines: the badge answers "how many things are in my
+   * bag", and two bottles of one serum is two things.
+   */
+  protected readonly cartCount = this.cart.unitCount;
+
+  /** The count is drawn, so it has to be said as well. */
+  protected readonly cartLabel = computed(() => {
+    const count = this.cartCount();
+    if (!this.isSignedIn()) {
+      return 'Shopping bag';
+    }
+
+    return count ? `Shopping bag, ${count} item${count === 1 ? '' : 's'}` : 'Shopping bag, empty';
+  });
 
   protected readonly exactMatch: IsActiveMatchOptions = {
     paths: 'exact',

@@ -26,6 +26,8 @@
         [price]="product.price ?? 0"
         [image]="imageFor(product)"
         [category]="product.categories[0]?.name ?? ''"
+        addLabel="Choose options"
+        (add)="openDetails(product)"
       />
     }
 

@@ -82,7 +82,7 @@ import {
         class="card__add"
         type="button"
         (click)="add.emit()"
-        [attr.aria-label]="'Add ' + name() + ' to cart'"
+        [attr.aria-label]="addLabel() + ': ' + name()"
       >
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
           <path
@@ -92,7 +92,7 @@ import {
             stroke-linecap="round"
           />
         </svg>
-        <span>Add to Cart</span>
+        <span>{{ addLabel() }}</span>
       </button>
     </article>
   `,
@@ -248,6 +248,8 @@ export class ProductCard {
   readonly category = input('');
   readonly description = input('');
   readonly editable = input(false);
+  /** The card sits in two shops: one adds to the cart, one opens the product. */
+  readonly addLabel = input('Add to Cart');
   readonly currencyCode = input('USD');
 
   readonly add = output<void>();
