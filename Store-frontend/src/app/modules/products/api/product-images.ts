@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ErrorNotification, errorNotification } from '@app/core/utils/error-notification';
 import { environment } from '@env/environment';
 import { NewProductImage, ProductImage } from '../models/product.model';
 
@@ -22,7 +23,9 @@ export class ApiProductImagesService {
     body.set('IsPrimary', String(image.isPrimary));
     body.set('DisplayOrder', String(image.displayOrder));
 
-    return this.http.post<ProductImage>(PRODUCT_IMAGES_URL, body);
+    return this.http.post<ProductImage>(PRODUCT_IMAGES_URL, body, {
+      context: errorNotification(ErrorNotification.FieldsInline),
+    });
   }
 
   /** Replaces the file behind an existing image; the old asset is deleted by the API. */
@@ -31,6 +34,8 @@ export class ApiProductImagesService {
     body.set('Image', file, file.name);
     body.set('IsPrimary', String(isPrimary));
 
-    return this.http.patch<ProductImage>(`${PRODUCT_IMAGES_URL}/${id}`, body);
+    return this.http.patch<ProductImage>(`${PRODUCT_IMAGES_URL}/${id}`, body, {
+      context: errorNotification(ErrorNotification.FieldsInline),
+    });
   }
 }

@@ -194,11 +194,6 @@
   border-radius: var(--radius-card);
 }
 
-.notice--inline {
-  padding: 0.75rem 0.9rem;
-  font-size: 0.875rem;
-}
-
 .skeletons {
   display: grid;
   gap: 0.5rem;
@@ -220,13 +215,6 @@
 }
 
 .pager__status {
-  color: var(--STOR-ink-soft);
-  font-size: 0.875rem;
-}
-
-.admin__status {
-  min-height: 1.5rem;
-  margin-top: 1.5rem;
   color: var(--STOR-ink-soft);
   font-size: 0.875rem;
 }

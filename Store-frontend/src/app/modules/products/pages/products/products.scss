@@ -86,13 +86,6 @@
   font-size: clamp(1.1rem, 2.4vw, 1.5rem);
 }
 
-.catalog__status {
-  min-height: 1.5rem;
-  margin-top: 1.5rem;
-  color: var(--STOR-ink-soft);
-  font-size: 0.875rem;
-}
-
 .catalog__new {
   justify-self: start;
   margin-top: clamp(1.25rem, 2.5vw, 1.75rem);

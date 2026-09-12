@@ -5,6 +5,7 @@ import { CategoryOrderBy } from '@app/core/models/enums/category-order-by';
 import { OrderDirection } from '@app/core/models/enums/order-direction';
 import { CategoryDetail, CategoryQuery } from '@app/core/models/interfaces/category';
 import { ApiCategoriesService } from '@app/core/services/api/categories';
+import { ToastService } from '@app/core/services/common/toast';
 import { describeError } from '@app/core/utils/api-error';
 
 const PAGE_SIZE = 10;
@@ -73,6 +74,7 @@ export const SORT_OPTIONS: readonly SortOption[] = [
 @Injectable()
 export class CategoriesStore {
   private readonly api = inject(ApiCategoriesService);
+  private readonly toasts = inject(ToastService);
 
   readonly searchFields = SEARCH_FIELDS;
   readonly sortOptions = SORT_OPTIONS;
@@ -113,11 +115,9 @@ export class CategoriesStore {
   private readonly categories = this.api.search(this.query);
 
   private readonly deletingIdState = signal<string | null>(null);
-  private readonly deleteErrorState = signal<string | null>(null);
 
   /** The category whose delete is in flight, so its row can show the progress. */
   readonly deletingId = this.deletingIdState.asReadonly();
-  readonly deleteError = this.deleteErrorState.asReadonly();
 
   readonly isLoading = computed(() => this.categories.isLoading());
 
@@ -155,13 +155,12 @@ export class CategoriesStore {
   }
 
   reload(): void {
-    this.deleteErrorState.set(null);
     this.categories.reload();
   }
 
   /**
-   * Soft-deletes the category and refreshes the listing. A failure leaves the
-   * message in `deleteError` and the row where it was.
+   * Soft-deletes the category and refreshes the listing. A failure is reported by
+   * `errorInterceptor` and leaves the row where it was.
    */
   remove(category: CategoryDetail): void {
     if (this.deletingIdState() !== null) {
@@ -169,17 +168,14 @@ export class CategoriesStore {
     }
 
     this.deletingIdState.set(category.id);
-    this.deleteErrorState.set(null);
 
     this.api.remove(category.id).subscribe({
       next: () => {
         this.deletingIdState.set(null);
+        this.toasts.success('Category deleted successfully.');
         this.afterRemoval();
       },
-      error: (error: unknown) => {
-        this.deletingIdState.set(null);
-        this.deleteErrorState.set(describeError(error));
-      },
+      error: () => this.deletingIdState.set(null),
     });
   }
 

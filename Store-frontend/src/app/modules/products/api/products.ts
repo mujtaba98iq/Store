@@ -2,6 +2,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { Injectable, Injector, Signal, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PaginatedResult } from '@app/core/models/interfaces/api-response';
+import { ErrorNotification, errorNotification } from '@app/core/utils/error-notification';
 import { environment } from '@env/environment';
 import {
   CreateProductBody,
@@ -38,19 +39,39 @@ export class ApiProductsService {
   private readonly http = inject(HttpClient);
   private readonly injector = inject(Injector);
 
-  /** Reactive catalogue listing - refetches whenever `query` changes. */
+  /**
+   * Reactive catalogue listing - refetches whenever `query` changes. A failed read
+   * is reported by the page that asked for it, which can offer a retry; a toast
+   * would only say the same thing twice.
+   */
   list(query: Signal<ProductQuery>) {
     return httpResource<PaginatedResult<Product>>(
-      () => ({ url: PRODUCTS_URL, params: toParams(query()) }),
+      () => ({
+        url: PRODUCTS_URL,
+        params: toParams(query()),
+        context: errorNotification(ErrorNotification.Silent),
+      }),
       { injector: this.injector },
     );
   }
 
   create(body: CreateProductBody): Observable<Product> {
-    return this.http.post<Product>(PRODUCTS_URL, body);
+    return this.http.post<Product>(PRODUCTS_URL, body, {
+      context: errorNotification(ErrorNotification.FieldsInline),
+    });
   }
 
-  update(id: string, body: UpdateProductBody): Observable<Product> {
-    return this.http.patch<Product>(`${PRODUCTS_URL}/${id}`, body);
+  /**
+   * `notify` is open so the caller can silence a write it has already decided not
+   * to act on - see the last call of `ProductFormStore.createWithImage`.
+   */
+  update(
+    id: string,
+    body: UpdateProductBody,
+    notify: ErrorNotification = ErrorNotification.FieldsInline,
+  ): Observable<Product> {
+    return this.http.patch<Product>(`${PRODUCTS_URL}/${id}`, body, {
+      context: errorNotification(notify),
+    });
   }
 }

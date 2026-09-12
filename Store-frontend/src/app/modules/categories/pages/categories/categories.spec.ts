@@ -1,8 +1,10 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { errorInterceptor } from '@app/core/interceptors/error-interceptor';
 import { PaginatedResult } from '@app/core/models/interfaces/api-response';
 import { CategoryDetail } from '@app/core/models/interfaces/category';
+import { ToastService } from '@app/core/services/common/toast';
 import { Categories } from './categories';
 
 function category(overrides: Partial<CategoryDetail> = {}): CategoryDetail {
@@ -26,6 +28,7 @@ describe('Categories', () => {
   let fixture: ComponentFixture<Categories>;
   let element: HTMLElement;
   let http: HttpTestingController;
+  let toasts: ToastService;
 
   const rowNames = () =>
     Array.from(element.querySelectorAll('.table__name')).map((node) => node.textContent?.trim());
@@ -62,16 +65,23 @@ describe('Categories', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Categories],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        // The page reports failures through the interceptor, so it is part of
+        // what these tests exercise.
+        provideHttpClient(withInterceptors([errorInterceptor])),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
 
     http = TestBed.inject(HttpTestingController);
+    toasts = TestBed.inject(ToastService);
     fixture = TestBed.createComponent(Categories);
     element = fixture.nativeElement as HTMLElement;
   });
 
   afterEach(() => {
     http.verify({ ignoreCancelled: true });
+    toasts.clear();
   });
 
   it('lists the page the API returns', async () => {
@@ -206,6 +216,23 @@ describe('Categories', () => {
     expect(element.querySelector('.empty__title')?.textContent).toContain('No categories yet');
   });
 
+  it('announces a delete that worked', async () => {
+    await flushList(page([category()]));
+
+    buttonLabelled('Delete')!.click();
+    await render();
+    buttonLabelled('Delete category')!.click();
+    await render();
+
+    pendingRequests('DELETE').at(-1)?.flush(null, { status: 204, statusText: 'No Content' });
+    await render();
+    await flushList(page([]));
+
+    expect(toasts.toasts().map((toast) => [toast.kind, toast.message])).toEqual([
+      ['success', 'Category deleted successfully.'],
+    ]);
+  });
+
   it('reports a delete the API refused and leaves the row in place', async () => {
     await flushList(page([category()]));
 
@@ -214,12 +241,22 @@ describe('Categories', () => {
     buttonLabelled('Delete category')!.click();
     await render();
 
-    // No body, so the canned sentence for a 403 is what the row falls back to.
+    // No body, so the canned sentence for a 403 is what the reader falls back to.
     pendingRequests('DELETE').at(-1)?.flush(null, { status: 403, statusText: 'Forbidden' });
     await render();
 
-    expect(element.querySelector('.notice--inline')?.textContent).toContain('permission');
+    // Reported once, by the interceptor - the row itself says nothing.
+    expect(toasts.toasts().map((toast) => toast.kind)).toEqual(['error']);
+    expect(toasts.toasts()[0].message).toContain('permission');
     expect(rowNames()).toEqual(['Moisturisers']);
+  });
+
+  it('leaves a failed listing to the page and does not also toast it', async () => {
+    pendingRequests('GET').at(-1)?.flush('nope', { status: 500, statusText: 'Server Error' });
+    await render();
+
+    expect(element.querySelector('.notice')).not.toBeNull();
+    expect(toasts.toasts()).toEqual([]);
   });
 
   it('surfaces a failed listing with a retry', async () => {

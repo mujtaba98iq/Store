@@ -34,8 +34,14 @@ function readMessage(body: unknown): string | null {
 
 /**
  * Pulls per-field messages out of the shapes the API can return:
- * `{ errors: { Name: [...] } }`, `{ Name: [...] }`, or `{ Name: "..." }`.
+ * `{ errors: { Name: [...] } }`, `{ errors: [...] }`, or `{ Name: [...] }`.
  * A bare array carries no field names, so it is left to `describeError`.
+ *
+ * Only a nested `errors` object is read key by key, because every key in one is a
+ * field name. Anywhere else a lone string is far more likely to be a `title`, a
+ * `traceId`, a `stackTrace` or a connection string than a message meant for the
+ * reader, and none of those may ever reach the screen - so outside `errors`, only
+ * an array of strings counts as a field's messages.
  */
 export function fieldErrors(error: unknown): FieldErrors {
   if (
@@ -49,10 +55,8 @@ export function fieldErrors(error: unknown): FieldErrors {
 
   const body = error.error as Record<string, unknown>;
   const nested = body['errors'];
-  const source =
-    typeof nested === 'object' && nested !== null && !Array.isArray(nested)
-      ? (nested as Record<string, unknown>)
-      : body;
+  const isFieldMap = typeof nested === 'object' && nested !== null && !Array.isArray(nested);
+  const source = isFieldMap ? (nested as Record<string, unknown>) : body;
 
   const collected: Record<string, readonly string[]> = {};
   for (const [field, value] of Object.entries(source)) {
@@ -61,7 +65,7 @@ export function fieldErrors(error: unknown): FieldErrors {
       if (messages.length) {
         collected[field] = messages;
       }
-    } else if (typeof value === 'string' && field !== 'message' && field !== 'title') {
+    } else if (isFieldMap && typeof value === 'string' && value.trim()) {
       collected[field] = [value];
     }
   }

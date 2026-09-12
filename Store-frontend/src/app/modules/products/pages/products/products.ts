@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AuthStore } from '@app/core/services/common/auth-store';
+import { ToastService } from '@app/core/services/common/toast';
 import { Modal } from '@app/shared/components/modal/modal';
 import { ProductCard } from '@app/shared/components/product-card/product-card';
 import { ProductForm } from '../../components/product-form/product-form';
@@ -18,6 +19,7 @@ import { productImageUrl } from '../../utils/product-image';
 export class Products {
   private readonly auth = inject(AuthStore);
   private readonly store = inject(ProductsStore);
+  private readonly toasts = inject(ToastService);
 
   protected readonly isAdmin = this.auth.isAdmin;
 
@@ -40,7 +42,6 @@ export class Products {
 
   protected readonly editing = signal<Product | null>(null);
   protected readonly isFormOpen = signal(false);
-  protected readonly lastAdded = signal('');
 
   protected selectCategory(categoryId: string | null): void {
     this.store.selectCategory(categoryId);
@@ -80,6 +81,7 @@ export class Products {
     this.isFormOpen.set(false);
   }
 
+  // The store announced the save; the page only has to close up and refetch.
   protected onSaved(): void {
     this.isFormOpen.set(false);
     this.store.reload();
@@ -87,6 +89,6 @@ export class Products {
 
   // No cart service yet - announce the action so the button is not a dead end.
   protected addToBag(product: Product): void {
-    this.lastAdded.set(product.name);
+    this.toasts.info(`${product.name} added to your bag.`);
   }
 }

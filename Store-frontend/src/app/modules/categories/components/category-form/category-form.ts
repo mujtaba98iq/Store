@@ -48,7 +48,6 @@ export class CategoryForm implements OnInit {
   readonly dismissed = output<void>();
 
   protected readonly saving = this.store.saving;
-  protected readonly serverError = this.store.serverError;
 
   protected readonly submitted = signal(false);
 

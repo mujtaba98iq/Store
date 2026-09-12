@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { EMPTY, Observable, catchError, finalize, map, of, switchMap, tap } from 'rxjs';
-import { FieldErrors, describeError, fieldErrors } from '@app/core/utils/api-error';
+import { ToastService } from '@app/core/services/common/toast';
+import { FieldErrors, fieldErrors } from '@app/core/utils/api-error';
+import { ErrorNotification } from '@app/core/utils/error-notification';
 import { ApiProductImagesService } from '../api/product-images';
 import { ApiProductsService } from '../api/products';
 import { CreateProductBody, Product } from '../models/product.model';
@@ -18,9 +20,9 @@ export type ProductFields = Omit<CreateProductBody, 'imagePath'>;
 export class ProductFormStore {
   private readonly api = inject(ApiProductsService);
   private readonly imagesApi = inject(ApiProductImagesService);
+  private readonly toasts = inject(ToastService);
 
   private readonly savingState = signal(false);
-  private readonly errorState = signal<string | null>(null);
   private readonly fieldErrorState = signal<FieldErrors>({});
 
   /**
@@ -30,22 +32,31 @@ export class ProductFormStore {
   private readonly createdState = signal<Product | null>(null);
 
   readonly saving = this.savingState.asReadonly();
-  readonly serverError = this.errorState.asReadonly();
   readonly serverFields = this.fieldErrorState.asReadonly();
   readonly created = this.createdState.asReadonly();
 
   /**
-   * Emits the saved product; a failed request emits nothing and leaves the
-   * message in `serverError` / `serverFields`, so the dialog stays open.
+   * Emits the saved product and announces it; a failed request emits nothing and
+   * leaves the per-field messages in `serverFields`, so the dialog stays open with
+   * the problem marked on the field it belongs to. Anything the API refused for a
+   * reason that is not about one field is reported by `errorInterceptor`.
    */
   save(existing: Product | null, fields: ProductFields, file: File | null): Observable<Product> {
+    // A retry after a failed upload is handed the product this store created, and
+    // is still the creation the admin started - not an edit of something that was
+    // already in the catalogue.
+    const isCreate = existing === null || existing.id === this.createdState()?.id;
+
     this.savingState.set(true);
-    this.errorState.set(null);
     this.fieldErrorState.set({});
 
     return this.request(existing, fields, file).pipe(
+      tap(() =>
+        this.toasts.success(
+          isCreate ? 'Product created successfully.' : 'Product updated successfully.',
+        ),
+      ),
       catchError((error: unknown) => {
-        this.errorState.set(describeError(error));
         this.fieldErrorState.set(fieldErrors(error));
         return EMPTY;
       }),
@@ -81,12 +92,13 @@ export class ProductFormStore {
       switchMap((product) =>
         this.uploadPrimary(product, file).pipe(
           switchMap((imageUrl) =>
-            this.api.update(product.id, { imagePath: imageUrl }).pipe(
-              // The product and its image are both stored by now, and `imagePath`
-              // is only the fallback for readers that ignore `images` - not worth
-              // sending the admin back into the form over.
-              catchError(() => of(product)),
-            ),
+            // The product and its image are both stored by now, and `imagePath` is
+            // only the fallback for readers that ignore `images` - not worth
+            // sending the admin back into the form over, so it is not worth a
+            // toast either.
+            this.api
+              .update(product.id, { imagePath: imageUrl }, ErrorNotification.Silent)
+              .pipe(catchError(() => of(product))),
           ),
         ),
       ),

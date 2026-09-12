@@ -30,7 +30,6 @@ export class Categories {
   protected readonly totalPages = this.store.totalPages;
   protected readonly errorMessage = this.store.errorMessage;
   protected readonly deletingId = this.store.deletingId;
-  protected readonly deleteError = this.store.deleteError;
   protected readonly hasFilters = this.store.hasFilters;
 
   protected readonly editing = signal<CategoryDetail | null>(null);
@@ -38,8 +37,6 @@ export class Categories {
 
   /** The category the admin has asked to delete, held until they confirm. */
   protected readonly pendingDelete = signal<CategoryDetail | null>(null);
-
-  protected readonly lastSaved = signal('');
 
   /** Rows are numbered across pages, so the first column reads like a ledger. */
   protected rowNumber(index: number): number {
@@ -84,9 +81,9 @@ export class Categories {
     this.isFormOpen.set(false);
   }
 
-  protected onSaved(category: CategoryDetail): void {
+  // The store announced the save; the page only has to close up and refetch.
+  protected onSaved(): void {
     this.isFormOpen.set(false);
-    this.lastSaved.set(category.name);
     this.store.reload();
   }
 

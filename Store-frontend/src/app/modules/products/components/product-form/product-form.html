@@ -1,10 +1,6 @@
 <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <h2 class="form__title">{{ title() }}</h2>
 
-  @if (serverError()) {
-    <p class="form__alert" role="alert">{{ serverError() }}</p>
-  }
-
   <div class="form__row">
     <label class="form__label" for="product-name">Name</label>
     <input id="product-name" class="form__control" type="text" formControlName="name" />
