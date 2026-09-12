@@ -44,6 +44,12 @@ export class Header {
       activeClass: 'nav__link--active',
       adminOnly: true,
     },
+    {
+      label: 'Users',
+      link: '/users',
+      activeClass: 'nav__link--active',
+      adminOnly: true,
+    },
     { label: 'Concept', link: '/', fragment: 'concept', activeClass: '' },
     { label: 'Contact Us', link: '/', fragment: 'contact', activeClass: '' },
   ]);

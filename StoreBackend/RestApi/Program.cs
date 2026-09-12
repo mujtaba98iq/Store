@@ -24,6 +24,7 @@ builder.AddWishlistsModule();
 builder.AddCategoriesModule();
 builder.AddUsersModule();
 builder.AddAuth();
+builder.AddErrorHandling();
 
 
 
@@ -65,6 +66,11 @@ builder.Services.AddCors(options =>
 builder.AddOpenApiDocs();
 
 var app = builder.Build();
+
+// First, so that everything downstream is inside it and no exception can reach the
+// developer exception page that WebApplication adds in Development - that page
+// renders the stack, the source paths and the request headers, bearer token and all.
+app.UseExceptionHandler();
 
 app.MapApiReference();
 

@@ -28,6 +28,14 @@ export const routes: Routes = [
       import('./modules/categories/pages/categories/categories').then((m) => m.Categories),
   },
   {
+    // Account administration, top to bottom. The API puts the whole users resource
+    // behind the Admin role, so the guard on this route matches it.
+    path: 'users',
+    title: 'STOR — Users',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./modules/users/pages/users/users').then((m) => m.Users),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

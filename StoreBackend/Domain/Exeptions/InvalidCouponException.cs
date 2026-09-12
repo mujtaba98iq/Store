@@ -5,4 +5,4 @@ namespace Domain.Exeptions;
 /// hundred or a window that ends before it starts. Staff-facing: it is about a coupon being
 /// written, not about one being used.
 /// </summary>
-public class InvalidCouponException(string message) : Exception(message);
+public class InvalidCouponException(string message) : DomainException(message);

@@ -21,24 +21,20 @@ public class AuthController(IAuthService authService) : ControllerBase
     [EnableRateLimiting("AuthLimiter")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        try
+        // Bad credentials leave here as UnauthorizedAccessException and are answered as
+        // a 401 by GlobalExceptionHandler, which gives every way of failing to sign in
+        // the same sentence - so whether a username exists cannot be read off the reply.
+        var result = await authService.Login(new LoginParams
         {
-            var result = await authService.Login(new LoginParams
-            {
-                Username = request.Username,
-                Password = request.Password
-            });
+            Username = request.Username,
+            Password = request.Password
+        });
 
-            return Ok(new LoginResponse
-            {
-                AccessToken = result.AccessToken,
-                RefreshToken = result.RefreshToken
-            });
-        }
-        catch (UnauthorizedAccessException)
+        return Ok(new LoginResponse
         {
-            return Unauthorized(new { message = "Invalid email or password." });
-        }
+            AccessToken = result.AccessToken,
+            RefreshToken = result.RefreshToken
+        });
     }
 
     /// <summary>
@@ -53,24 +49,17 @@ public class AuthController(IAuthService authService) : ControllerBase
     [EnableRateLimiting("AuthLimiter")]
     public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
     {
-        try
+        var result = await authService.GetRefreshTokken(new RefreshTokkenParams
         {
-            var result = await authService.GetRefreshTokken(new RefreshTokkenParams
-            {
-                RefreshToken = request.RefreshToken,
-                Email = request.Email
-            });
+            RefreshToken = request.RefreshToken,
+            Email = request.Email
+        });
 
-            return Ok(new RefreshResponse
-            {
-                AccessToken = result.AccessToken,
-                RefreshToken = result.RefreshToken
-            });
-        }
-        catch (UnauthorizedAccessException)
+        return Ok(new RefreshResponse
         {
-            return Unauthorized(new { message = "Invalid email or password." });
-        }
+            AccessToken = result.AccessToken,
+            RefreshToken = result.RefreshToken
+        });
     }
 
     [HttpPost("logout")]

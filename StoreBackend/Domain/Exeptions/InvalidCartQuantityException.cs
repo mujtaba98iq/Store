@@ -1,3 +1,3 @@
 namespace Domain.Exeptions;
 
-public class InvalidCartQuantityException(string message) : Exception(message);
+public class InvalidCartQuantityException(string message) : DomainException(message);

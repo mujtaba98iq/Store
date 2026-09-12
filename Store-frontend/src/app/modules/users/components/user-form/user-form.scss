@@ -1,0 +1,60 @@
+:host {
+  display: block;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  font-weight: 500;
+}
+
+.form__row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.form__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--STOR-ink-soft);
+}
+
+.form__control {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--STOR-surface);
+  border: 1px solid var(--STOR-line);
+  border-radius: 2px;
+  font: inherit;
+  color: inherit;
+  resize: vertical;
+}
+
+.form__hint {
+  color: var(--STOR-ink-soft);
+  font-size: 0.8125rem;
+}
+
+.form__hint--error {
+  color: #7c2016;
+}
+
+.form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* The role picker is the one control here that is a menu rather than a box. */
+select.form__control {
+  cursor: pointer;
+}

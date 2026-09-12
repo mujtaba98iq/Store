@@ -4,4 +4,4 @@ namespace Domain.Exeptions;
 /// Raised when a coupon exists but is in no position to be used: withdrawn by staff, or
 /// quoted before it opens or after it has closed.
 /// </summary>
-public class CouponNotActiveException(string message) : Exception(message);
+public class CouponNotActiveException(string message) : DomainException(message);

@@ -1,0 +1,65 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h2 class="form__title">{{ title() }}</h2>
+
+  <div class="form__row">
+    <label class="form__label" for="user-username">Username</label>
+    <input
+      id="user-username"
+      class="form__control"
+      type="text"
+      autocomplete="username"
+      formControlName="username"
+    />
+    @if (showError('username')) {
+      <p class="form__hint form__hint--error">{{ usernameHint }}</p>
+    } @else {
+      <p class="form__hint">{{ usernameHint }}</p>
+    }
+    @for (message of messagesFor('username'); track message) {
+      <p class="form__hint form__hint--error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="form__row">
+    <label class="form__label" for="user-password">
+      {{ isEdit() ? 'New password' : 'Password' }}
+    </label>
+    <input
+      id="user-password"
+      class="form__control"
+      type="password"
+      autocomplete="new-password"
+      formControlName="password"
+    />
+    @if (showError('password')) {
+      <p class="form__hint form__hint--error">{{ passwordHint() }}</p>
+    } @else {
+      <p class="form__hint">{{ passwordHint() }}</p>
+    }
+    @for (message of messagesFor('password'); track message) {
+      <p class="form__hint form__hint--error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="form__row">
+    <label class="form__label" for="user-role">Role</label>
+    <select id="user-role" class="form__control" formControlName="role">
+      @for (option of roles; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+    <p class="form__hint">Admins can reach every management page; customers cannot.</p>
+    @for (message of messagesFor('role'); track message) {
+      <p class="form__hint form__hint--error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="form__actions">
+    <button class="btn btn--light" type="button" (click)="cancel()" [disabled]="saving()">
+      Cancel
+    </button>
+    <button class="btn btn--dark" type="submit" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : isEdit() ? 'Save changes' : 'Create user' }}
+    </button>
+  </div>
+</form>

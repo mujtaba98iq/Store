@@ -14,7 +14,7 @@ public class AuthService(IUsersRepository usersRepository, IConfiguration config
     public async Task<AuthResult> Login(LoginParams loginParams)
     {
         var user = await usersRepository.FindByUsername(loginParams.Username)
-            ?? throw new ResourceNotFoundException("User", $"No user found with username '{loginParams.Username}'");
+            ?? throw new UnauthorizedAccessException("Invalid username or password.");
 
         bool passwordValid = BCrypt.Net.BCrypt.Verify(loginParams.Password, user.Password);
 
@@ -78,7 +78,7 @@ public class AuthService(IUsersRepository usersRepository, IConfiguration config
     public async Task<AuthResult> GetRefreshTokken(RefreshTokkenParams refreshTokkenParams)
     {
         var user = await usersRepository.FindByUsername(refreshTokkenParams.Email)
-            ?? throw new ResourceNotFoundException("User", $"No user found with username '{refreshTokkenParams.Email}'");
+            ?? throw new UnauthorizedAccessException("Invalid refresh token.");
 
 
         if(user.RefreshTokenRevokeAt != null)
@@ -142,7 +142,7 @@ public class AuthService(IUsersRepository usersRepository, IConfiguration config
     public async Task Logout(LogoutParams logoutParams)
     {
         var user = await usersRepository.FindByUsername(logoutParams.Email)
-            ?? throw new ResourceNotFoundException("User", $"No user found with username '{logoutParams.Email}'");
+            ?? throw new UnauthorizedAccessException("Invalid refresh token.");
 
         bool refreshValid = BCrypt.Net.BCrypt.Verify(logoutParams.RefreshToken, user.RefreshTokenHash);
         if (refreshValid)

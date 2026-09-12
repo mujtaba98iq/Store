@@ -1,0 +1,214 @@
+<section class="admin">
+  <div class="admin__intro">
+    <p class="admin__eyebrow">Back of house</p>
+    <h1 class="admin__title">Users</h1>
+    <p class="admin__lede">
+      Who can sign in, and how far they get once they have. Admins reach every management page;
+      customers reach the shop.
+    </p>
+    <button class="btn btn--dark admin__new" type="button" (click)="openCreate()">New user</button>
+  </div>
+
+  <div class="admin__body">
+    <div class="toolbar">
+      <div class="toolbar__filters" role="group" aria-label="Filter by role">
+        <span class="toolbar__legend">Role</span>
+        @for (option of roleFilters; track option.value) {
+          <button
+            class="pill"
+            type="button"
+            [class.pill--active]="role() === option.value"
+            [attr.aria-pressed]="role() === option.value"
+            (click)="selectRole(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+
+      <div class="toolbar__controls">
+        <div class="field">
+          <label class="sr-only" for="user-search">Search users</label>
+          <svg class="field__icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="m15.6 15.6 4.4 4.4" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+          <input
+            id="user-search"
+            class="field__input"
+            type="search"
+            placeholder="Search usernames"
+            [value]="searchInput()"
+            (input)="onSearch($event)"
+          />
+        </div>
+
+        <div class="field field--select">
+          <label class="field__label" for="user-sort">Sort</label>
+          <select id="user-sort" class="field__input" (change)="onSortChange($event)">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value" [selected]="option.value === sortKey()">
+                {{ option.label }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <p class="admin__count" aria-live="polite">
+      @if (isLoading()) {
+        Loading users…
+      } @else {
+        {{ totalCount() }} {{ totalCount() === 1 ? 'user' : 'users' }}
+      }
+    </p>
+
+    @if (errorMessage()) {
+      <div class="notice" role="alert">
+        <p class="notice__title">{{ errorMessage() }}</p>
+        <button class="btn btn--light" type="button" (click)="retry()">Try again</button>
+      </div>
+    } @else if (isLoading() && !items().length) {
+      <div class="skeletons" aria-hidden="true">
+        @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
+          <div class="skeleton"></div>
+        }
+      </div>
+    } @else if (items().length) {
+      <div class="table-wrap">
+        <table class="table">
+          <caption class="sr-only">
+            Users, page
+            {{
+              page()
+            }}
+            of
+            {{
+              totalPages()
+            }}
+          </caption>
+          <thead>
+            <tr>
+              <th class="table__num" scope="col">#</th>
+              <th scope="col">Username</th>
+              <th scope="col">Role</th>
+              <th scope="col">Created</th>
+              <th class="table__actions-head" scope="col">
+                <span class="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of items(); track user.id; let i = $index) {
+              <tr [class.row--busy]="deletingId() === user.id">
+                <td class="table__num">{{ rowNumber(i) }}</td>
+                <th class="table__name" scope="row">
+                  {{ user.username }}
+                  @if (isSelf(user)) {
+                    <span class="table__self">you</span>
+                  }
+                </th>
+                <td>
+                  <span class="role" [class.role--admin]="user.role === 'Admin'">
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td class="table__date">
+                  <time [attr.datetime]="user.createdAt">
+                    {{ user.createdAt | date: 'mediumDate' }}
+                  </time>
+                  @if (user.updatedAt) {
+                    <span class="table__note">
+                      edited {{ user.updatedAt | date: 'mediumDate' }}
+                    </span>
+                  }
+                </td>
+                <td class="table__actions">
+                  <button
+                    class="link-btn"
+                    type="button"
+                    [disabled]="deletingId() === user.id"
+                    (click)="openEdit(user)"
+                  >
+                    Edit
+                  </button>
+                  @if (!isSelf(user)) {
+                    <button
+                      class="link-btn link-btn--danger"
+                      type="button"
+                      [disabled]="deletingId() === user.id"
+                      (click)="askToDelete(user)"
+                    >
+                      {{ deletingId() === user.id ? 'Deleting…' : 'Delete' }}
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <nav class="pager" aria-label="User pages">
+          <button
+            class="btn btn--light"
+            type="button"
+            [disabled]="page() === 1"
+            (click)="goToPage(page() - 1)"
+          >
+            Previous
+          </button>
+          <p class="pager__status" aria-live="polite">Page {{ page() }} of {{ totalPages() }}</p>
+          <button
+            class="btn btn--light"
+            type="button"
+            [disabled]="page() === totalPages()"
+            (click)="goToPage(page() + 1)"
+          >
+            Next
+          </button>
+        </nav>
+      }
+    } @else {
+      <div class="empty">
+        @if (hasFilters()) {
+          <p class="empty__title">Nobody matches that search.</p>
+          <button class="btn btn--light" type="button" (click)="clearFilters()">
+            Clear filters
+          </button>
+        } @else {
+          <p class="empty__title">No users yet.</p>
+          <button class="btn btn--dark" type="button" (click)="openCreate()">
+            Create the first one
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  @if (isFormOpen()) {
+    <app-modal label="the user form" (closed)="closeForm()">
+      <app-user-form [user]="editing()" (saved)="onSaved()" (dismissed)="closeForm()" />
+    </app-modal>
+  }
+
+  @if (pendingDelete(); as user) {
+    <app-modal label="delete confirmation" (closed)="cancelDelete()">
+      <div class="confirm">
+        <h2 class="confirm__title">Delete {{ user.username }}?</h2>
+        <p class="confirm__body">
+          They can no longer sign in, and the username is freed for someone else. Everything the
+          account created — products, categories, orders — is left alone.
+        </p>
+        <div class="confirm__actions">
+          <button class="btn btn--light" type="button" (click)="cancelDelete()">Cancel</button>
+          <button class="btn btn--danger" type="button" (click)="confirmDelete()">
+            Delete user
+          </button>
+        </div>
+      </div>
+    </app-modal>
+  }
+</section>

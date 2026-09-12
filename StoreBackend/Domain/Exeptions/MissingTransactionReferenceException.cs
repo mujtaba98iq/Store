@@ -4,4 +4,4 @@ namespace Domain.Exeptions;
 /// Raised when a payment is settled without the provider reference that proves it. Cash on
 /// delivery is the exception: the courier is the receipt.
 /// </summary>
-public class MissingTransactionReferenceException(string message) : Exception(message);
+public class MissingTransactionReferenceException(string message) : DomainException(message);

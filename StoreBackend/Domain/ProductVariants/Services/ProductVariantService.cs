@@ -70,7 +70,7 @@ namespace Domain.ProductVariants
             var existing = await productVariantsRepository.FindBySku(sku);
             if (existing != null)
             {
-                throw new ResourceAlreadyExistsException(sku);
+                throw new ResourceAlreadyExistsException("Product variant", $"SKU {sku}");
             }
         }
     }

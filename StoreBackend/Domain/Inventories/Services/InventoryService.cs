@@ -77,7 +77,7 @@ namespace Domain.Inventories
             var existing = await inventoriesRepository.FindByProductVariantId(productVariantId);
             if (existing != null)
             {
-                throw new ResourceAlreadyExistsException(productVariantId.ToString());
+                throw new ResourceAlreadyExistsException("Inventory", $"product variant {productVariantId}");
             }
         }
 
