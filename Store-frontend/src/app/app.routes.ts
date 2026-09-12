@@ -36,6 +36,17 @@ export const routes: Routes = [
     loadComponent: () => import('./modules/users/pages/users/users').then((m) => m.Users),
   },
   {
+    // Variants are readable by any signed-in account, but every control here
+    // writes, and the API puts all of those behind the Admin role.
+    path: 'product-variants',
+    title: 'STOR — Product Variants',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./modules/product-variants/pages/product-variants/product-variants').then(
+        (m) => m.ProductVariants,
+      ),
+  },
+  {
     // Stock levels are readable by any signed-in account, but every control here
     // writes, and the API puts all of those behind the Admin role.
     path: 'inventories',

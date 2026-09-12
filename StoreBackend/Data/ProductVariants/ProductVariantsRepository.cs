@@ -10,6 +10,11 @@ public class ProductVariantsRepository(ApplicationDbContext dbContext) : IProduc
     {
         dbContext.ProductVariants.Add(productVariant);
         await dbContext.SaveChangesAsync();
+
+        // The caller formats the variant straight away, and the product name it reports
+        // lives on the product, which a freshly built entity has no reference to yet.
+        await dbContext.Entry(productVariant).Reference(v => v.Product).LoadAsync();
+
         return productVariant;
     }
 
@@ -17,6 +22,9 @@ public class ProductVariantsRepository(ApplicationDbContext dbContext) : IProduc
     {
         var query = dbContext.ProductVariants
             .AsNoTracking()
+            // A variant is only ever read alongside the product it belongs to, so the
+            // join is part of the listing rather than a lookup per row.
+            .Include(v => v.Product)
             .Where(v => v.DeletedAt == null)
             .AsQueryable();
 
@@ -97,6 +105,7 @@ public class ProductVariantsRepository(ApplicationDbContext dbContext) : IProduc
     public async Task<ProductVariant?> FindById(Guid id)
     {
         var productVariant = await dbContext.ProductVariants
+            .Include(v => v.Product)
             .FirstOrDefaultAsync(v => v.Id == id && v.DeletedAt == null);
         return productVariant;
     }

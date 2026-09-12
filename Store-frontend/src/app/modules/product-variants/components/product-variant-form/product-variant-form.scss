@@ -1,0 +1,99 @@
+:host {
+  display: block;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  font-weight: 500;
+}
+
+.form__row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+/* Price and barcode belong together, so they sit side by side until the dialog is
+   too narrow to hold them. */
+.form__pair {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.form__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--STOR-ink-soft);
+}
+
+.form__control {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--STOR-surface);
+  border: 1px solid var(--STOR-line);
+  border-radius: 2px;
+  font: inherit;
+  color: inherit;
+}
+
+/* SKUs and barcodes are codes, so they are typed as ones - scanned, not read. */
+.form__control--code {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.9375rem;
+  letter-spacing: 0.02em;
+}
+
+/* The product on an edit: settled, so it reads as a value rather than a box. */
+.form__fixed {
+  min-height: 2.75rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--STOR-cream);
+  border: 1px solid var(--STOR-line);
+  border-radius: 2px;
+  font-size: 0.9375rem;
+}
+
+.form__check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.form__check input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--STOR-ink);
+  cursor: pointer;
+}
+
+.form__hint {
+  color: var(--STOR-ink-soft);
+  font-size: 0.8125rem;
+}
+
+.form__hint--error {
+  color: #7c2016;
+}
+
+.form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+/* The product picker is the one control here that is a menu rather than a box. */
+select.form__control {
+  cursor: pointer;
+}

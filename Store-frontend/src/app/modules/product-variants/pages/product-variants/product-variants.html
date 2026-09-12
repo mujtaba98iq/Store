@@ -1,0 +1,275 @@
+<section class="admin">
+  <div class="admin__intro">
+    <p class="admin__eyebrow">Back of house</p>
+    <h1 class="admin__title">Product variants</h1>
+    <p class="admin__lede">
+      The forms a product is actually sold in — a size, a shade. Each one carries its own SKU, and a
+      price and barcode of its own when it needs them.
+    </p>
+    <button class="btn btn--dark admin__new" type="button" (click)="openCreate()">
+      New variant
+    </button>
+  </div>
+
+  <div class="admin__body">
+    <div class="toolbar">
+      <div class="toolbar__filters" role="group" aria-label="Filter by status">
+        <span class="toolbar__legend">Status</span>
+        @for (option of statusFilters; track option.value) {
+          <button
+            class="pill"
+            type="button"
+            [class.pill--active]="status() === option.value"
+            [attr.aria-pressed]="status() === option.value"
+            (click)="selectStatus(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+
+      <div class="toolbar__controls">
+        <div class="field">
+          <label class="sr-only" for="variant-search">Search variants by SKU</label>
+          <svg class="field__icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="m15.6 15.6 4.4 4.4" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+          <input
+            id="variant-search"
+            class="field__input"
+            type="search"
+            placeholder="Search SKUs"
+            [value]="searchInput()"
+            (input)="onSearch($event)"
+          />
+        </div>
+
+        <div class="field">
+          <label class="sr-only" for="variant-barcode-filter">Search variants by barcode</label>
+          <input
+            id="variant-barcode-filter"
+            class="field__input"
+            type="search"
+            placeholder="Barcode"
+            [value]="barcodeInput()"
+            (input)="onBarcode($event)"
+          />
+        </div>
+
+        <div class="field field--select">
+          <label class="field__label" for="variant-product-filter">Product</label>
+          <select
+            id="variant-product-filter"
+            class="field__input"
+            (change)="onProductChange($event)"
+          >
+            <option value="" [selected]="productId() === ''">
+              {{ productsLoading() ? 'Loading…' : 'All products' }}
+            </option>
+            @for (product of productOptions(); track product.id) {
+              <option [value]="product.id" [selected]="product.id === productId()">
+                {{ product.name }}
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="field field--select">
+          <label class="field__label" for="variant-sort">Sort</label>
+          <select id="variant-sort" class="field__input" (change)="onSortChange($event)">
+            @for (option of sortOptions; track option.value) {
+              <option [value]="option.value" [selected]="option.value === sortKey()">
+                {{ option.label }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <p class="admin__count" aria-live="polite">
+      @if (isLoading()) {
+        Loading variants…
+      } @else {
+        {{ totalCount() }} {{ totalCount() === 1 ? 'variant' : 'variants' }}
+      }
+    </p>
+
+    @if (errorMessage()) {
+      <div class="notice" role="alert">
+        <p class="notice__title">{{ errorMessage() }}</p>
+        <button class="btn btn--light" type="button" (click)="retry()">Try again</button>
+      </div>
+    } @else if (isLoading() && !items().length) {
+      <div class="skeletons" aria-hidden="true">
+        @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
+          <div class="skeleton"></div>
+        }
+      </div>
+    } @else if (items().length) {
+      <div class="table-wrap">
+        <table class="table">
+          <caption class="sr-only">
+            Product variants, page
+            {{
+              page()
+            }}
+            of
+            {{
+              totalPages()
+            }}
+          </caption>
+          <thead>
+            <tr>
+              <th class="table__num" scope="col">#</th>
+              <th scope="col">SKU</th>
+              <th scope="col">Product</th>
+              <th class="table__price-head" scope="col">Price</th>
+              <th scope="col">Barcode</th>
+              <th scope="col">Status</th>
+              <th scope="col">Created</th>
+              <th class="table__actions-head" scope="col">
+                <span class="sr-only">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (variant of items(); track variant.id; let i = $index) {
+              <tr [class.row--busy]="deletingId() === variant.id">
+                <td class="table__num">{{ rowNumber(i) }}</td>
+                <th class="table__name" scope="row">
+                  <span class="code">{{ variant.sku }}</span>
+                </th>
+                <td>
+                  <span [class.table__missing]="!variant.productName">
+                    {{ productLabel(variant) }}
+                  </span>
+                </td>
+                <td class="table__price">
+                  @if (variant.price === null) {
+                    <!-- No price of its own, so it sells at the product's. -->
+                    <span class="table__inherited">Product price</span>
+                  } @else {
+                    {{ variant.price | currency: 'USD' }}
+                  }
+                </td>
+                <td>
+                  @if (variant.barcode) {
+                    <span class="code code--soft">{{ variant.barcode }}</span>
+                  } @else {
+                    <span class="table__missing">—</span>
+                  }
+                </td>
+                <td>
+                  <span class="status" [class.status--off]="!variant.isActive">
+                    {{ variant.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="table__date">
+                  <time [attr.datetime]="variant.createdAt">
+                    {{ variant.createdAt | date: 'mediumDate' }}
+                  </time>
+                  @if (variant.updatedAt) {
+                    <span class="table__note">
+                      edited {{ variant.updatedAt | date: 'mediumDate' }}
+                    </span>
+                  }
+                </td>
+                <td class="table__actions">
+                  <button
+                    class="link-btn"
+                    type="button"
+                    [disabled]="deletingId() === variant.id"
+                    (click)="openEdit(variant)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="link-btn link-btn--danger"
+                    type="button"
+                    [disabled]="deletingId() === variant.id"
+                    (click)="askToDelete(variant)"
+                  >
+                    {{ deletingId() === variant.id ? 'Deleting…' : 'Delete' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <nav class="pager" aria-label="Variant pages">
+          <button
+            class="btn btn--light"
+            type="button"
+            [disabled]="page() === 1"
+            (click)="goToPage(page() - 1)"
+          >
+            Previous
+          </button>
+          <p class="pager__status" aria-live="polite">Page {{ page() }} of {{ totalPages() }}</p>
+          <button
+            class="btn btn--light"
+            type="button"
+            [disabled]="page() === totalPages()"
+            (click)="goToPage(page() + 1)"
+          >
+            Next
+          </button>
+        </nav>
+      }
+    } @else {
+      <div class="empty">
+        @if (hasFilters()) {
+          <p class="empty__title">No variants match those filters.</p>
+          <button class="btn btn--light" type="button" (click)="clearFilters()">
+            Clear filters
+          </button>
+        } @else {
+          <p class="empty__title">No product variants yet.</p>
+          <button class="btn btn--dark" type="button" (click)="openCreate()">
+            Create the first one
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  @if (isFormOpen()) {
+    <app-modal label="the variant form" (closed)="closeForm()">
+      <app-product-variant-form
+        [variant]="editing()"
+        [products]="productOptions()"
+        [productsLoading]="productsLoading()"
+        (saved)="onSaved()"
+        (dismissed)="closeForm()"
+      />
+    </app-modal>
+  }
+
+  @if (pendingDelete(); as variant) {
+    <app-modal label="delete confirmation" (closed)="cancelDelete()">
+      <div class="confirm">
+        <h2 class="confirm__title">Delete {{ variant.sku }}?</h2>
+        <p class="confirm__body">
+          The variant drops out of this listing and can no longer be bought. Orders already placed
+          against it are left alone — they record what was sold, not what is still on sale. A
+          variant that still has a stock row open against it is refused; delete that first.
+        </p>
+        <p class="confirm__body">
+          To take it off sale without deleting it, edit it and clear <strong>Active</strong>
+          instead.
+        </p>
+        <div class="confirm__actions">
+          <button class="btn btn--light" type="button" (click)="cancelDelete()">Cancel</button>
+          <button class="btn btn--danger" type="button" (click)="confirmDelete()">
+            Delete variant
+          </button>
+        </div>
+      </div>
+    </app-modal>
+  }
+</section>

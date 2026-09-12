@@ -33,6 +33,7 @@ internal static class DomainExceptionStatusMap
         typeof(OrderNotPayableException),
         typeof(ProductAlreadyReviewedException),
         typeof(ProductVariantNotPurchasableException),
+        typeof(ProductVariantStillStockedException),
         typeof(ShipmentAlreadyExistsException),
         typeof(TransactionAlreadyRecordedException),
     ];

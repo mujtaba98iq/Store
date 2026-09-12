@@ -71,5 +71,19 @@ namespace RestApi.ProductVariants.Controllers
             return Ok(responseFormatter.One(updatedProductVariant));
         }
 
+        [HttpDelete("{productVariantId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(object), 404)]
+        public async Task<IActionResult> Delete(Guid productVariantId)
+        {
+            var deleted = await productVariantService.Delete(new DeleteProductVariantParams
+            {
+                Id = productVariantId,
+                DeletedById = this.GetUserId()
+            });
+
+            return deleted ? NoContent() : NotFound();
+        }
+
     }
 }

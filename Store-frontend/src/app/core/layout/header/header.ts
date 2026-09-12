@@ -45,6 +45,12 @@ export class Header {
       adminOnly: true,
     },
     {
+      label: 'Variants',
+      link: '/product-variants',
+      activeClass: 'nav__link--active',
+      adminOnly: true,
+    },
+    {
       label: 'Inventories',
       link: '/inventories',
       activeClass: 'nav__link--active',

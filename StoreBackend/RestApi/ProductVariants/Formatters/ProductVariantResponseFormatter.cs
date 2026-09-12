@@ -21,6 +21,7 @@ public class ProductVariantResponseFormatter : IProductVariantResponseFormatter
         {
             Id = productVariant.Id.ToString(),
             ProductId = productVariant.ProductId.ToString(),
+            ProductName = productVariant.Product?.Name,
             Sku = productVariant.Sku,
             Price = productVariant.Price,
             Barcode = productVariant.Barcode,
