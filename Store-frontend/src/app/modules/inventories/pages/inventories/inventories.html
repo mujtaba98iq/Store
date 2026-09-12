@@ -1,18 +1,37 @@
 <section class="admin">
-  <div class="admin__intro">
-    <p class="admin__eyebrow">Back of house</p>
-    <h1 class="admin__title">Inventories</h1>
-    <p class="admin__lede">
-      What is on the shelf, what is already promised, and what is left to sell. One stock row per
-      product variant.
-    </p>
-    <button class="btn btn--dark admin__new" type="button" (click)="openCreate()">
-      New stock row
-    </button>
-  </div>
+  <div class="admin__shell">
+    <!-- Title on the left, the actions that change the listing on the right. -->
+    <header class="admin__head">
+      <div>
+        <h1 class="admin__title">Inventories</h1>
+        <p class="admin__count" aria-live="polite">
+          @if (isLoading()) {
+            Loading stock…
+          } @else {
+            {{ totalCount() }} {{ totalCount() === 1 ? 'stock row' : 'stock rows' }}
+          }
+        </p>
+      </div>
 
-  <div class="admin__body">
-    <div class="toolbar">
+      <div class="admin__actions">
+        <button
+          class="btn btn--sm btn--light"
+          type="button"
+          [disabled]="!hasFilters()"
+          (click)="clearFilters()"
+        >
+          Clear filters
+        </button>
+        <button class="btn btn--sm btn--dark" type="button" (click)="openCreate()">
+          <svg class="btn__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.75" />
+          </svg>
+          New stock row
+        </button>
+      </div>
+    </header>
+
+    <div class="toolbar admin__toolbar">
       <div class="toolbar__filters" role="group" aria-label="Filter by availability">
         <span class="toolbar__legend">Stock</span>
         @for (option of availabilityFilters; track option.value) {
@@ -86,24 +105,18 @@
       </div>
     </div>
 
-    <p class="admin__count" aria-live="polite">
-      @if (isLoading()) {
-        Loading stock…
-      } @else {
-        {{ totalCount() }} {{ totalCount() === 1 ? 'stock row' : 'stock rows' }}
-      }
-    </p>
-
     @if (errorMessage()) {
       <div class="notice" role="alert">
+        <svg class="notice__icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <path d="M12 7.5v5.5M12 16.2v.6" stroke="currentColor" stroke-width="1.75" />
+        </svg>
         <p class="notice__title">{{ errorMessage() }}</p>
-        <button class="btn btn--light" type="button" (click)="retry()">Try again</button>
+        <button class="btn btn--sm btn--light" type="button" (click)="retry()">Try again</button>
       </div>
     } @else if (isLoading() && !items().length) {
-      <div class="skeletons" aria-hidden="true">
-        @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
-          <div class="skeleton"></div>
-        }
+      <div class="loading">
+        <span class="spinner" role="status" aria-label="Loading stock"></span>
       </div>
     } @else if (items().length) {
       <div class="table-wrap">
@@ -156,14 +169,12 @@
                     {{ inventory.createdAt | date: 'mediumDate' }}
                   </time>
                   @if (inventory.updatedAt) {
-                    <span class="table__note">
-                      edited {{ inventory.updatedAt | date: 'mediumDate' }}
-                    </span>
+                    <span class="badge">edited {{ inventory.updatedAt | date: 'MMM d' }}</span>
                   }
                 </td>
                 <td class="table__actions">
                   <button
-                    class="link-btn"
+                    class="row-btn"
                     type="button"
                     [disabled]="deletingId() === inventory.id"
                     (click)="openEdit(inventory)"
@@ -171,7 +182,7 @@
                     Edit
                   </button>
                   <button
-                    class="link-btn link-btn--danger"
+                    class="row-btn row-btn--danger"
                     type="button"
                     [disabled]="deletingId() === inventory.id"
                     (click)="askToDelete(inventory)"
@@ -186,36 +197,32 @@
       </div>
 
       @if (totalPages() > 1) {
-        <nav class="pager" aria-label="Stock pages">
-          <button
-            class="btn btn--light"
-            type="button"
-            [disabled]="page() === 1"
-            (click)="goToPage(page() - 1)"
-          >
-            Previous
-          </button>
-          <p class="pager__status" aria-live="polite">Page {{ page() }} of {{ totalPages() }}</p>
-          <button
-            class="btn btn--light"
-            type="button"
-            [disabled]="page() === totalPages()"
-            (click)="goToPage(page() + 1)"
-          >
-            Next
-          </button>
-        </nav>
+        <app-pager
+          [page]="page()"
+          [totalPages]="totalPages()"
+          label="Stock pages"
+          (pageChange)="goToPage($event)"
+        />
       }
     } @else {
       <div class="empty">
+        <svg class="empty__icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true">
+          <path
+            d="M12 3.2 20.3 7v10L12 20.8 3.7 17V7L12 3.2Zm0 0v8.6m0 0L3.7 7m8.3 4.8L20.3 7m-8.3 4.8v9"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linejoin="round"
+          />
+        </svg>
         @if (hasFilters()) {
           <p class="empty__title">No stock matches those filters.</p>
-          <button class="btn btn--light" type="button" (click)="clearFilters()">
+          <button class="btn btn--sm btn--light" type="button" (click)="clearFilters()">
             Clear filters
           </button>
         } @else {
           <p class="empty__title">No stock rows yet.</p>
-          <button class="btn btn--dark" type="button" (click)="openCreate()">
+          <button class="btn btn--sm btn--dark" type="button" (click)="openCreate()">
             Create the first one
           </button>
         }

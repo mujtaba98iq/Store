@@ -1,13 +1,14 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Modal } from '@app/shared/components/modal/modal';
+import { Pager } from '@app/shared/components/pager/pager';
 import { UserForm } from '../../components/user-form/user-form';
 import { UsersStore } from '../../data-access/users-store';
 import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-users',
-  imports: [DatePipe, Modal, UserForm],
+  imports: [DatePipe, Modal, Pager, UserForm],
   templateUrl: './users.html',
   styleUrl: './users.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

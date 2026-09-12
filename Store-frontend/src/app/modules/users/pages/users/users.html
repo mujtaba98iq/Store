@@ -1,16 +1,37 @@
 <section class="admin">
-  <div class="admin__intro">
-    <p class="admin__eyebrow">Back of house</p>
-    <h1 class="admin__title">Users</h1>
-    <p class="admin__lede">
-      Who can sign in, and how far they get once they have. Admins reach every management page;
-      customers reach the shop.
-    </p>
-    <button class="btn btn--dark admin__new" type="button" (click)="openCreate()">New user</button>
-  </div>
+  <div class="admin__shell">
+    <!-- Title on the left, the actions that change the listing on the right. -->
+    <header class="admin__head">
+      <div>
+        <h1 class="admin__title">Users</h1>
+        <p class="admin__count" aria-live="polite">
+          @if (isLoading()) {
+            Loading users…
+          } @else {
+            {{ totalCount() }} {{ totalCount() === 1 ? 'user' : 'users' }}
+          }
+        </p>
+      </div>
 
-  <div class="admin__body">
-    <div class="toolbar">
+      <div class="admin__actions">
+        <button
+          class="btn btn--sm btn--light"
+          type="button"
+          [disabled]="!hasFilters()"
+          (click)="clearFilters()"
+        >
+          Clear filters
+        </button>
+        <button class="btn btn--sm btn--dark" type="button" (click)="openCreate()">
+          <svg class="btn__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.75" />
+          </svg>
+          New user
+        </button>
+      </div>
+    </header>
+
+    <div class="toolbar admin__toolbar">
       <div class="toolbar__filters" role="group" aria-label="Filter by role">
         <span class="toolbar__legend">Role</span>
         @for (option of roleFilters; track option.value) {
@@ -56,24 +77,18 @@
       </div>
     </div>
 
-    <p class="admin__count" aria-live="polite">
-      @if (isLoading()) {
-        Loading users…
-      } @else {
-        {{ totalCount() }} {{ totalCount() === 1 ? 'user' : 'users' }}
-      }
-    </p>
-
     @if (errorMessage()) {
       <div class="notice" role="alert">
+        <svg class="notice__icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <path d="M12 7.5v5.5M12 16.2v.6" stroke="currentColor" stroke-width="1.75" />
+        </svg>
         <p class="notice__title">{{ errorMessage() }}</p>
-        <button class="btn btn--light" type="button" (click)="retry()">Try again</button>
+        <button class="btn btn--sm btn--light" type="button" (click)="retry()">Try again</button>
       </div>
     } @else if (isLoading() && !items().length) {
-      <div class="skeletons" aria-hidden="true">
-        @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
-          <div class="skeleton"></div>
-        }
+      <div class="loading">
+        <span class="spinner" role="status" aria-label="Loading users"></span>
       </div>
     } @else if (items().length) {
       <div class="table-wrap">
@@ -119,14 +134,12 @@
                     {{ user.createdAt | date: 'mediumDate' }}
                   </time>
                   @if (user.updatedAt) {
-                    <span class="table__note">
-                      edited {{ user.updatedAt | date: 'mediumDate' }}
-                    </span>
+                    <span class="badge">edited {{ user.updatedAt | date: 'MMM d' }}</span>
                   }
                 </td>
                 <td class="table__actions">
                   <button
-                    class="link-btn"
+                    class="row-btn"
                     type="button"
                     [disabled]="deletingId() === user.id"
                     (click)="openEdit(user)"
@@ -135,7 +148,7 @@
                   </button>
                   @if (!isSelf(user)) {
                     <button
-                      class="link-btn link-btn--danger"
+                      class="row-btn row-btn--danger"
                       type="button"
                       [disabled]="deletingId() === user.id"
                       (click)="askToDelete(user)"
@@ -151,36 +164,32 @@
       </div>
 
       @if (totalPages() > 1) {
-        <nav class="pager" aria-label="User pages">
-          <button
-            class="btn btn--light"
-            type="button"
-            [disabled]="page() === 1"
-            (click)="goToPage(page() - 1)"
-          >
-            Previous
-          </button>
-          <p class="pager__status" aria-live="polite">Page {{ page() }} of {{ totalPages() }}</p>
-          <button
-            class="btn btn--light"
-            type="button"
-            [disabled]="page() === totalPages()"
-            (click)="goToPage(page() + 1)"
-          >
-            Next
-          </button>
-        </nav>
+        <app-pager
+          [page]="page()"
+          [totalPages]="totalPages()"
+          label="User pages"
+          (pageChange)="goToPage($event)"
+        />
       }
     } @else {
       <div class="empty">
+        <svg class="empty__icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true">
+          <path
+            d="M12 12.4a3.9 3.9 0 1 0 0-7.8 3.9 3.9 0 0 0 0 7.8Zm-7 7.4a7 7 0 0 1 14 0"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"
+          />
+        </svg>
         @if (hasFilters()) {
           <p class="empty__title">Nobody matches that search.</p>
-          <button class="btn btn--light" type="button" (click)="clearFilters()">
+          <button class="btn btn--sm btn--light" type="button" (click)="clearFilters()">
             Clear filters
           </button>
         } @else {
           <p class="empty__title">No users yet.</p>
-          <button class="btn btn--dark" type="button" (click)="openCreate()">
+          <button class="btn btn--sm btn--dark" type="button" (click)="openCreate()">
             Create the first one
           </button>
         }

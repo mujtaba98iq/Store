@@ -18,6 +18,18 @@
     border-color 0.2s ease;
 }
 
+/* The compact size the management toolbars use, matching the pill height. */
+.btn--sm {
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+}
+
+.btn__icon {
+  flex: none;
+}
+
 .btn--dark {
   background: var(--STOR-ink);
   color: #fff;

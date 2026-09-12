@@ -1,0 +1,268 @@
+/*
+ * The shell the four management listings share: a measured column, a compact
+ * header, a striped table and the states around it. Everything generic is scoped
+ * to `.admin` so the catalogue and the cart keep their own `.table`, `.empty` and
+ * `.notice`. A page's own columns and labels stay in its stylesheet.
+ *
+ * The toolbar, pills and fields come from _toolbar.scss; the pager is its own
+ * component in shared/components/pager.
+ */
+
+/* A measured column rather than a full-bleed page, so the table stays readable. */
+.admin__shell {
+  width: min(72rem, 100%);
+  margin-inline: auto;
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1.1rem, 3vw, 2.25rem) clamp(3rem, 6vw, 4.5rem);
+}
+
+.admin__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+.admin__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.6vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.admin__count {
+  margin-top: 0.3rem;
+  color: var(--STOR-ink-soft);
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+}
+
+.admin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin__toolbar {
+  padding-bottom: clamp(1rem, 2vw, 1.25rem);
+  border-bottom: 1px solid var(--STOR-line);
+}
+
+.admin {
+  /* Narrow screens scroll the table sideways rather than crushing the columns. */
+  .table-wrap {
+    margin-top: clamp(1rem, 2vw, 1.5rem);
+    overflow-x: auto;
+    background: var(--STOR-surface);
+    border: 1px solid var(--STOR-line);
+    border-radius: var(--radius-card);
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+
+  /*
+   * Wrapped in :where() so the cell defaults carry almost no specificity: a page
+   * that re-aligns one column - the stock counts, the prices - only needs a plain
+   * class rule of its own, with nothing to out-specify.
+   */
+  :where(.table th, .table td) {
+    padding: 0.7rem 1rem;
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  .table thead th {
+    color: var(--STOR-ink-soft);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--STOR-line);
+  }
+
+  /* Striped, so a long row is easy to follow across the width. */
+  .table tbody tr:nth-child(even) {
+    background: #faf7f2;
+  }
+
+  .table tbody tr:hover {
+    background: rgba(243, 231, 215, 0.55);
+  }
+
+  /* Dimmed while its delete is in flight. */
+  .row--busy {
+    opacity: 0.55;
+  }
+
+  .table__num {
+    width: 3rem;
+    color: var(--STOR-ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .table__name {
+    font-weight: 500;
+  }
+
+  .table__date {
+    color: var(--STOR-ink-soft);
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .table__empty {
+    color: var(--STOR-line);
+  }
+
+  .table__actions-head,
+  .table__actions {
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  .table__actions {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  /* Marks a row that has been edited since it was created. */
+  .badge {
+    display: inline-block;
+    margin-inline-start: 0.5rem;
+    padding: 0.1rem 0.5rem;
+    background: rgba(23, 96, 125, 0.1);
+    border-radius: 999px;
+    color: var(--STOR-accent-deep);
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+  }
+
+  .row-btn {
+    min-height: 2rem;
+    padding: 0 0.625rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .row-btn:hover:not(:disabled) {
+    background: var(--STOR-surface);
+    border-color: var(--STOR-line);
+  }
+
+  .row-btn--danger {
+    color: #7c2016;
+  }
+
+  .row-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .loading {
+    display: grid;
+    place-items: center;
+    padding: clamp(3rem, 8vw, 4.5rem) 0;
+  }
+
+  .spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--STOR-line);
+    border-top-color: var(--STOR-ink);
+    border-radius: 50%;
+    animation: admin-spinner-turn 0.8s linear infinite;
+  }
+
+  .empty {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    margin-top: clamp(1rem, 2vw, 1.5rem);
+    padding: clamp(2.5rem, 6vw, 4rem) 1.5rem;
+    background: var(--STOR-cream);
+    border-radius: var(--radius-card);
+    text-align: center;
+  }
+
+  .empty__icon {
+    color: var(--STOR-ink-soft);
+    opacity: 0.55;
+  }
+
+  .empty__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 2.4vw, 1.4rem);
+  }
+
+  .notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    margin-top: clamp(1rem, 2vw, 1.5rem);
+    padding: 1rem clamp(1rem, 2vw, 1.25rem);
+    color: #7c2016;
+    background: rgba(150, 40, 30, 0.06);
+    border: 1px solid rgba(150, 40, 30, 0.22);
+    border-radius: var(--radius-card);
+  }
+
+  .notice__icon {
+    flex: none;
+  }
+
+  .notice__title {
+    flex: 1 1 12rem;
+    font-size: 0.9375rem;
+  }
+
+  .confirm {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .confirm__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    font-weight: 500;
+  }
+
+  .confirm__body {
+    color: var(--STOR-ink-soft);
+    font-size: 0.9375rem;
+  }
+
+  .confirm__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+}
+
+@keyframes admin-spinner-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The global reduced-motion rule only shortens animations; this stops this one. */
+@media (prefers-reduced-motion: reduce) {
+  .admin .spinner {
+    animation: none;
+  }
+}

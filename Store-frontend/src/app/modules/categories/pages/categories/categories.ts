@@ -2,12 +2,13 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CategoryDetail } from '@app/core/models/interfaces/category';
 import { Modal } from '@app/shared/components/modal/modal';
+import { Pager } from '@app/shared/components/pager/pager';
 import { CategoryForm } from '../../components/category-form/category-form';
 import { CategoriesStore, SearchField } from '../../data-access/categories-store';
 
 @Component({
   selector: 'app-categories',
-  imports: [DatePipe, Modal, CategoryForm],
+  imports: [DatePipe, Modal, Pager, CategoryForm],
   templateUrl: './categories.html',
   styleUrl: './categories.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

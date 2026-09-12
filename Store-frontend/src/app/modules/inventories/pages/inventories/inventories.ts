@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Modal } from '@app/shared/components/modal/modal';
+import { Pager } from '@app/shared/components/pager/pager';
 import { InventoryForm } from '../../components/inventory-form/inventory-form';
 import { InventoriesStore } from '../../data-access/inventories-store';
 import { Inventory } from '../../models/inventory.model';
@@ -10,7 +11,7 @@ const LOW_STOCK_THRESHOLD = 5;
 
 @Component({
   selector: 'app-inventories',
-  imports: [DatePipe, Modal, InventoryForm],
+  imports: [DatePipe, Modal, Pager, InventoryForm],
   templateUrl: './inventories.html',
   styleUrl: './inventories.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

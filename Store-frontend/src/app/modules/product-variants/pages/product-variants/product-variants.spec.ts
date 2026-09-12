@@ -205,7 +205,7 @@ describe('ProductVariants', () => {
   it('pages through the results', async () => {
     await flushList(page([variant()], 30));
 
-    buttonLabelled('Next')!.click();
+    element.querySelector<HTMLButtonElement>('[aria-label="Next page"]')!.click();
 
     const request = await flushList(page([variant()], 30));
     expect(request?.request.params.get('Page')).toBe('2');

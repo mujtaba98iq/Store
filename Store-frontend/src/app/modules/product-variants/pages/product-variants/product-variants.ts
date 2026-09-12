@@ -1,13 +1,14 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Modal } from '@app/shared/components/modal/modal';
+import { Pager } from '@app/shared/components/pager/pager';
 import { ProductVariantForm } from '../../components/product-variant-form/product-variant-form';
 import { ProductVariantsStore } from '../../data-access/product-variants-store';
 import { ProductVariant } from '../../models/product-variant.model';
 
 @Component({
   selector: 'app-product-variants',
-  imports: [CurrencyPipe, DatePipe, Modal, ProductVariantForm],
+  imports: [CurrencyPipe, DatePipe, Modal, Pager, ProductVariantForm],
   templateUrl: './product-variants.html',
   styleUrl: './product-variants.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

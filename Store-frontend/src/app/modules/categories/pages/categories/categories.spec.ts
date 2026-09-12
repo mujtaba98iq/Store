@@ -137,10 +137,19 @@ describe('Categories', () => {
   it('pages through the results', async () => {
     await flushList(page([category()], 30));
 
-    buttonLabelled('Next')!.click();
+    element.querySelector<HTMLButtonElement>('[aria-label="Next page"]')!.click();
 
     const request = await flushList(page([category()], 30));
     expect(request?.request.params.get('Page')).toBe('2');
+  });
+
+  it('jumps straight to a page the pager names', async () => {
+    await flushList(page([category()], 30));
+
+    element.querySelector<HTMLButtonElement>('[aria-label="Page 3"]')!.click();
+
+    const request = await flushList(page([category()], 30));
+    expect(request?.request.params.get('Page')).toBe('3');
   });
 
   it('creates a category from the form', async () => {

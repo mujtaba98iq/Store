@@ -1,58 +1,8 @@
 :host {
-  /* Matches the header's horizontal padding so the page aligns with the brand. */
-  --page-x: clamp(1.1rem, 3vw, 2.25rem);
-
   display: block;
 }
 
-/* The toolbar, pills and fields come from src/styles/common/_toolbar.scss. */
-
-.admin__intro {
-  padding: clamp(1.5rem, 4vw, 3rem) var(--page-x) clamp(1.75rem, 4vw, 3rem);
-  /* The same warm bloom that sits behind the catalogue header. */
-  background:
-    radial-gradient(120% 90% at 82% 0%, rgb(255 255 255 / 55%) 0%, rgb(255 255 255 / 0%) 62%),
-    linear-gradient(160deg, var(--STOR-cream) 0%, var(--STOR-cream-deep) 100%);
-}
-
-.admin__eyebrow {
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--STOR-ink-soft);
-}
-
-.admin__title {
-  margin-top: clamp(0.75rem, 1.5vw, 1.25rem);
-  font-family: var(--font-display);
-  font-size: clamp(1.9rem, 4.5vw, 3.25rem);
-  font-weight: 500;
-  line-height: 1.04;
-  letter-spacing: -0.02em;
-}
-
-.admin__lede {
-  max-width: 52ch;
-  margin-top: 0.75rem;
-  color: var(--STOR-ink-soft);
-  font-size: clamp(0.9375rem, 1.2vw, 1.0625rem);
-}
-
-.admin__new {
-  margin-top: clamp(1.25rem, 2.5vw, 1.75rem);
-}
-
-.admin__body {
-  padding: clamp(1.5rem, 3vw, 2.5rem) var(--page-x) clamp(3rem, 6vw, 5rem);
-}
-
-.admin__count {
-  margin-top: clamp(1.25rem, 2.5vw, 2rem);
-  color: var(--STOR-ink-soft);
-  font-size: 0.8125rem;
-  letter-spacing: 0.06em;
-}
+/* The shell, toolbar, table and states are shared - see src/styles/common/. */
 
 /* The two quantity bounds share one bordered field, so the pair reads as a single
    range control rather than as two loose boxes. */
@@ -69,61 +19,6 @@
   color: var(--STOR-ink-soft);
 }
 
-/* Narrow screens scroll the table sideways rather than crushing the columns. */
-.table-wrap {
-  margin-top: 1rem;
-  overflow-x: auto;
-  background: var(--STOR-surface);
-  border: 1px solid var(--STOR-line);
-  border-radius: var(--radius-card);
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9375rem;
-}
-
-.table th,
-.table td {
-  padding: 0.85rem 1rem;
-  text-align: start;
-  vertical-align: top;
-}
-
-.table thead th {
-  color: var(--STOR-ink-soft);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  border-bottom: 1px solid var(--STOR-line);
-}
-
-.table tbody tr + tr {
-  border-top: 1px solid var(--STOR-line);
-}
-
-.table tbody tr:hover {
-  background: #faf6f0;
-}
-
-/* Dimmed while its delete is in flight. */
-.row--busy {
-  opacity: 0.55;
-}
-
-.table__num {
-  width: 3rem;
-  color: var(--STOR-ink-soft);
-  font-variant-numeric: tabular-nums;
-}
-
-.table__name {
-  font-weight: 500;
-}
-
 /* Counts line up down the column, which is the only way a stock table is read. */
 .table__count-head,
 .table__count {
@@ -134,29 +29,6 @@
 
 .table__count--soft {
   color: var(--STOR-ink-soft);
-}
-
-.table__date {
-  display: grid;
-  gap: 0.2rem;
-  color: var(--STOR-ink-soft);
-  font-size: 0.875rem;
-  white-space: nowrap;
-}
-
-.table__note {
-  font-size: 0.75rem;
-}
-
-.table__actions-head,
-.table__actions {
-  width: 1%;
-  white-space: nowrap;
-}
-
-.table__actions {
-  display: flex;
-  gap: 0.75rem;
 }
 
 /* A SKU is a code, so it is set as one - it is scanned down the column, not read. */
@@ -192,105 +64,4 @@
   color: #7c2016;
   font-size: 0.8125rem;
   letter-spacing: 0.04em;
-}
-
-.link-btn {
-  padding: 0;
-  background: none;
-  border: 0;
-  color: var(--STOR-ink);
-  font: inherit;
-  font-size: 0.875rem;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-
-.link-btn:hover {
-  text-decoration-thickness: 2px;
-}
-
-.link-btn--danger {
-  color: #7c2016;
-}
-
-.link-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.empty {
-  display: grid;
-  justify-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: clamp(2.5rem, 6vw, 4.5rem) 1.5rem;
-  background: var(--STOR-cream);
-  border-radius: var(--radius-card);
-  text-align: center;
-}
-
-.empty__title {
-  font-family: var(--font-display);
-  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
-}
-
-.notice {
-  display: grid;
-  justify-items: start;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: clamp(1.25rem, 3vw, 2rem);
-  color: #7c2016;
-  background: rgba(150, 40, 30, 0.06);
-  border: 1px solid rgba(150, 40, 30, 0.22);
-  border-radius: var(--radius-card);
-}
-
-.skeletons {
-  display: grid;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.skeleton {
-  height: 3.25rem;
-  background: linear-gradient(180deg, #f3ede4 0%, #e9e0d3 100%);
-  border-radius: 2px;
-}
-
-.pager {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(0.75rem, 2vw, 1.5rem);
-  margin-top: clamp(2rem, 4vw, 3rem);
-}
-
-.pager__status {
-  color: var(--STOR-ink-soft);
-  font-size: 0.875rem;
-}
-
-.confirm {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.confirm__title {
-  font-family: var(--font-display);
-  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
-  font-weight: 500;
-}
-
-.confirm__body {
-  color: var(--STOR-ink-soft);
-  font-size: 0.9375rem;
-}
-
-.confirm__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
 }
