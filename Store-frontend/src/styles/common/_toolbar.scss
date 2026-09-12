@@ -1,0 +1,129 @@
+/*
+ * The filter bar the catalogue and the management pages share: a row of pills on
+ * one side, a search box and a sort menu on the other.
+ */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem clamp(1rem, 2.5vw, 2rem);
+}
+
+.toolbar__filters,
+.toolbar__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbar__legend {
+  margin-inline-end: 0.25rem;
+  color: var(--STOR-ink-soft);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pill {
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  background: var(--STOR-surface);
+  border: 1px solid var(--STOR-line);
+  border-radius: 2px;
+  color: var(--STOR-ink-soft);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.pill:hover {
+  background: #f6f1ea;
+  color: var(--STOR-ink);
+}
+
+.pill--active {
+  background: var(--STOR-ink);
+  border-color: var(--STOR-ink);
+  color: #fff;
+}
+
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding-inline: 0.75rem;
+  background: var(--STOR-surface);
+  border: 1px solid var(--STOR-line);
+  border-radius: 2px;
+}
+
+.field:focus-within {
+  outline: 2px solid var(--STOR-ink);
+  outline-offset: 1px;
+}
+
+.field__icon,
+.field__label {
+  flex: none;
+  color: var(--STOR-ink-soft);
+}
+
+.field__label {
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.field__input {
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  color: inherit;
+}
+
+.field__input:focus {
+  outline: none;
+}
+
+.field--select {
+  padding-inline-end: 2rem;
+}
+
+.field--select select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.field--select::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: 0.9rem;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 1.5px solid var(--STOR-ink-soft);
+  border-bottom: 1.5px solid var(--STOR-ink-soft);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+@media (max-width: 599px) {
+  .toolbar__controls {
+    width: 100%;
+  }
+
+  .toolbar__controls .field {
+    flex: 1 1 9rem;
+  }
+}

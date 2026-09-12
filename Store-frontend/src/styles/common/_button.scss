@@ -41,3 +41,13 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* Destructive confirmations only - never the resting state of a row. */
+.btn--danger {
+  background: #7c2016;
+  color: #fff;
+}
+
+.btn--danger:hover {
+  background: #641a12;
+}

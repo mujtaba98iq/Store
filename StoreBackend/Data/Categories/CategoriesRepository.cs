@@ -77,7 +77,8 @@ public class CategoriesRepository(ApplicationDbContext dbContext) : ICategoriesR
 
     public async Task<Category?> FindById(Guid id)
     {
-        var category = await dbContext.Categories.FindAsync(id);
+        var category = await dbContext.Categories
+            .FirstOrDefaultAsync(c => c.Id == id && c.DeletedAt == null);
         return category;
     }
 
@@ -90,13 +91,18 @@ public class CategoriesRepository(ApplicationDbContext dbContext) : ICategoriesR
 
     public async Task<int> GetTotalCountByFilters(CategoryFilters categoryFilters)
     {
-        var query = dbContext.Categories.AsNoTracking().AsQueryable();
+        var query = dbContext.Categories.AsNoTracking()
+            .Where(c => c.DeletedAt == null)
+            .AsQueryable();
+
         query = ApplyFilters(query, categoryFilters);
         return await query.CountAsync();
     }
 
     public async Task<List<Category>> FindByIds(List<Guid> ids)
     {
-        return await dbContext.Categories.Where(c => ids.Contains(c.Id)).ToListAsync();
+        return await dbContext.Categories
+            .Where(c => ids.Contains(c.Id) && c.DeletedAt == null)
+            .ToListAsync();
     }
 }

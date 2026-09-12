@@ -17,7 +17,7 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
     public async Task<List<Product>> FindByFilters(ProductFilters productFilters)
     {
         var query = dbContext.Products
-            .Include(p => p.Categories)
+            .Include(p => p.Categories.Where(c => c.DeletedAt == null))
             .Include(p => p.Variants.Where(v => v.DeletedAt == null))
             .Include(p => p.Images.Where(i => i.DeletedAt == null))
             .AsNoTracking()
@@ -101,7 +101,7 @@ public class ProductsRepository(ApplicationDbContext dbContext) : IProductsRepos
     public async Task<Product?> FindById(Guid id)
     {
         var product = await dbContext.Products
-            .Include(p => p.Categories)
+            .Include(p => p.Categories.Where(c => c.DeletedAt == null))
             .Include(p => p.Variants.Where(v => v.DeletedAt == null))
             .Include(p => p.Images.Where(i => i.DeletedAt == null))
             .FirstOrDefaultAsync(p => p.Id == id);

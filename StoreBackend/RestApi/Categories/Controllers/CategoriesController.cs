@@ -66,5 +66,19 @@ namespace RestApi.Categories.Controllers
             return Ok(responseFormatter.One(updatedCategory));
         }
 
+        [HttpDelete("{categoryId}")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(typeof(object), 404)]
+        public async Task<IActionResult> Delete(Guid categoryId)
+        {
+            var deleted = await categoryService.Delete(new DeleteCategoryParams
+            {
+                Id = categoryId,
+                DeletedById = this.GetUserId()
+            });
+
+            return deleted ? NoContent() : NotFound();
+        }
+
     }
 }

@@ -47,5 +47,23 @@ namespace Domain.Categories
 
             return await categoriesRepository.Update(category);
         } 
+
+        /// <inheritdoc />
+        public async Task<bool> Delete(DeleteCategoryParams deleteCategoryParams)
+        {
+            var category = await categoriesRepository.FindById(deleteCategoryParams.Id);
+            if (category is null)
+            {
+                return false;
+            }
+
+            // Soft delete: the products that were filed under this category keep their
+            // join rows, and the listings all skip rows with a DeletedAt.
+            category.DeletedAt = DateTime.UtcNow;
+            category.DeletedById = deleteCategoryParams.DeletedById;
+
+            await categoriesRepository.Update(category);
+            return true;
+        }
     }
 }

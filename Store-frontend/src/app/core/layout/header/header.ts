@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { IsActiveMatchOptions, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '@app/core/services/common/auth-store';
 import { SessionService } from '@app/core/services/common/session';
@@ -9,6 +9,8 @@ interface NavItem {
   readonly fragment?: string;
   /** Empty for in-page anchors, which never own the active state. */
   readonly activeClass: string;
+  /** Links behind the admin guard, hidden from everyone who cannot follow them. */
+  readonly adminOnly?: boolean;
 }
 
 @Component({
@@ -34,11 +36,21 @@ export class Header {
   };
 
   // Concept and Contact are still sections of the landing page.
-  protected readonly navItems = signal<readonly NavItem[]>([
+  private readonly allNavItems = signal<readonly NavItem[]>([
     { label: 'Products', link: '/products', activeClass: 'nav__link--active' },
+    {
+      label: 'Categories',
+      link: '/categories',
+      activeClass: 'nav__link--active',
+      adminOnly: true,
+    },
     { label: 'Concept', link: '/', fragment: 'concept', activeClass: '' },
     { label: 'Contact Us', link: '/', fragment: 'contact', activeClass: '' },
   ]);
+
+  protected readonly navItems = computed(() =>
+    this.allNavItems().filter((item) => !item.adminOnly || this.auth.isAdmin()),
+  );
 
   protected signOut(): void {
     this.session.signOut();

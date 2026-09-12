@@ -1,0 +1,47 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h2 class="form__title">{{ title() }}</h2>
+
+  @if (serverError()) {
+    <p class="form__alert" role="alert">{{ serverError() }}</p>
+  }
+
+  <div class="form__row">
+    <label class="form__label" for="category-name">Name</label>
+    <input id="category-name" class="form__control" type="text" formControlName="name" />
+    @if (showError('name')) {
+      <p class="form__hint form__hint--error">{{ nameHint }}</p>
+    } @else {
+      <p class="form__hint">{{ nameHint }}</p>
+    }
+    @for (message of messagesFor('name'); track message) {
+      <p class="form__hint form__hint--error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="form__row">
+    <label class="form__label" for="category-description">Description</label>
+    <textarea
+      id="category-description"
+      class="form__control"
+      rows="4"
+      formControlName="description"
+    ></textarea>
+    @if (showError('description')) {
+      <p class="form__hint form__hint--error">{{ descriptionHint }}</p>
+    } @else {
+      <p class="form__hint">{{ descriptionHint }}</p>
+    }
+    @for (message of messagesFor('description'); track message) {
+      <p class="form__hint form__hint--error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="form__actions">
+    <button class="btn btn--light" type="button" (click)="cancel()" [disabled]="saving()">
+      Cancel
+    </button>
+    <button class="btn btn--dark" type="submit" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : isEdit() ? 'Save changes' : 'Create category' }}
+    </button>
+  </div>
+</form>

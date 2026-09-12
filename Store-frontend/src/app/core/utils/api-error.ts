@@ -99,7 +99,7 @@ export function describeError(error: unknown): string | null {
     case 403:
       return 'Your account does not have permission to do that.';
     case 404:
-      return 'That product no longer exists.';
+      return 'That item no longer exists.';
     case 429:
       return 'Too many attempts. Please wait a moment and try again.';
     default:
